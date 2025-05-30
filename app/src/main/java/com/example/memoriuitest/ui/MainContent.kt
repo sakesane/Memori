@@ -1,5 +1,6 @@
 package com.example.memoriuitest.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -51,7 +52,10 @@ fun MainContent(
             onToggleExpand = { id ->
                 expandedDecks = if (id in expandedDecks) expandedDecks - id else expandedDecks + id
             },
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            onDeckClick = { deckId ->
+                navController.navigate("card/$deckId")
+            }
         )
     }
 }
@@ -74,11 +78,12 @@ fun DeckList(
     decks: List<Deck>,
     expandedDecks: Set<Int>,
     onToggleExpand: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onDeckClick: ((Int) -> Unit)? = null
 ) {
     LazyColumn(modifier = modifier) {
         items(decks) { deck ->
-            DeckItem(deck, expandedDecks, onToggleExpand)
+            DeckItem(deck, expandedDecks, onToggleExpand, onDeckClick = onDeckClick)
         }
     }
 }
@@ -88,13 +93,17 @@ fun DeckItem(
     deck: Deck,
     expandedDecks: Set<Int>,
     onToggleExpand: (Int) -> Unit,
-    indent: Int = 0
+    indent: Int = 0,
+    onDeckClick: ((Int) -> Unit)? = null
 ) {
     Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = (indent * 16).dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
+                .padding(start = (indent * 16).dp, end = 16.dp, top = 12.dp, bottom = 12.dp)
+                .let { m ->
+                    if (onDeckClick != null) m.clickable { onDeckClick(deck.id) } else m
+                },
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(modifier = Modifier.width(24.dp))
@@ -106,7 +115,6 @@ fun DeckItem(
                     Text(if (deck.id in expandedDecks) "-" else "+")
                 }
             } else {
-                // 占位，与按钮对齐
                 Spacer(modifier = Modifier.size(24.dp))
             }
             Text(
@@ -136,7 +144,7 @@ fun DeckItem(
         }
         if (deck.id in expandedDecks && deck.subDecks.isNotEmpty()) {
             deck.subDecks.forEach { subDeck ->
-                DeckItem(subDeck, expandedDecks, onToggleExpand, indent = indent + 1)
+                DeckItem(subDeck, expandedDecks, onToggleExpand, indent = indent + 1, onDeckClick = onDeckClick)
             }
         }
     }

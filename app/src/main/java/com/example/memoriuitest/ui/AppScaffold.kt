@@ -20,9 +20,11 @@ fun AppScaffold(navController: NavHostController) {
         "stats" -> 2
         else -> 0 // 默认主页面
     }
+    val hideBars = currentRoute?.startsWith("card") == true
+
     Scaffold(
-        topBar = { TopNavBar() },
-        bottomBar = { BottomNavBar(selectedIndex = selectedIndex, navController = navController) }
+        topBar = { if (!hideBars) TopNavBar() },
+        bottomBar = { if (!hideBars) BottomNavBar(selectedIndex, navController) }
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             AppNavGraph(navController = navController)
