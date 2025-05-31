@@ -11,17 +11,25 @@ import com.example.memoriuitest.ui.SmartContent
 import com.example.memoriuitest.ui.StatsContent
 import com.example.memoriuitest.ui.CardScreen
 
+object Routes {
+    const val MAIN = "main"
+    const val STATS = "stats"
+    const val SMART = "smart"
+    const val CARD = "card"
+    const val CARD_WITH_ARG = "card/{deckId}"
+}
+
 @Composable
 fun AppNavGraph(navController: NavHostController, startDestination: String = "main") {
     NavHost(
         navController = navController,
         startDestination = startDestination
     ) {
-        composable("main") { MainContent(navController) }
-        composable("stats") { StatsContent(navController) }
-        composable("smart") { SmartContent(navController) }
+        composable(Routes.MAIN) { MainContent(navController) }
+        composable(Routes.STATS) { StatsContent(navController) }
+        composable(Routes.SMART) { SmartContent(navController) }
         composable(
-            route = "card/{deckId}",
+            Routes.CARD_WITH_ARG,
             arguments = listOf(navArgument("deckId") { type = NavType.StringType })
         ) { backStackEntry ->
             CardScreen(deckId = backStackEntry.arguments?.getString("deckId"))

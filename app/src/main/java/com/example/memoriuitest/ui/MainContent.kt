@@ -15,6 +15,7 @@ import com.example.memoriuitest.model.Deck
 import com.example.memoriuitest.ui.theme.wordNewGreen
 import com.example.memoriuitest.ui.theme.reviewPurple
 import androidx.navigation.NavController
+import com.example.memoriuitest.navigation.Routes
 
 @Composable
 fun MainContent(
@@ -54,7 +55,9 @@ fun MainContent(
             },
             modifier = Modifier.weight(1f),
             onDeckClick = { deckId ->
-                navController.navigate("card/$deckId")
+                navController.navigate(Routes.CARD_WITH_ARG.replace("{deckId}", deckId.toString())){
+                    popUpTo(Routes.MAIN)
+                }
             }
         )
     }
