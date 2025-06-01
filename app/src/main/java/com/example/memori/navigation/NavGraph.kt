@@ -1,4 +1,4 @@
-package com.example.memoriuitest.navigation
+package com.example.memori.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -6,10 +6,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.example.memoriuitest.ui.MainContent
-import com.example.memoriuitest.ui.SmartContent
-import com.example.memoriuitest.ui.StatsContent
-import com.example.memoriuitest.ui.CardScreen
+import com.example.memori.ui.MainContent
+import com.example.memori.ui.SmartContent
+import com.example.memori.ui.StatsContent
+import com.example.memori.ui.CardScreen
 
 object Routes {
     const val MAIN = "main"

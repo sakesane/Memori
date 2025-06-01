@@ -1,4 +1,4 @@
-package com.example.memoriuitest.ui
+package com.example.memori.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,7 +13,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavBackStackEntry
 
 @Composable
 fun CardScreen(deckId: String?) {

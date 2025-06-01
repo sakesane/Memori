@@ -1,4 +1,4 @@
-package com.example.memoriuitest
+package com.example.memori
 
 import org.junit.Test
 

@@ -1,10 +1,10 @@
-package com.example.memoriuitest
+package com.example.memori
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.example.memoriuitest.ui.theme.MemoriUITestTheme
-import com.example.memoriuitest.ui.AppScaffold
+import com.example.memori.ui.theme.MemoriUITestTheme
+import com.example.memori.ui.AppScaffold
 import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 

@@ -1,4 +1,4 @@
-package com.example.memoriuitest
+package com.example.memori
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

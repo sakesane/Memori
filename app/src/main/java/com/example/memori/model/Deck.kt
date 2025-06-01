@@ -1,4 +1,4 @@
-package com.example.memoriuitest.model
+package com.example.memori.model
 
 data class Deck(
     val id: Int,

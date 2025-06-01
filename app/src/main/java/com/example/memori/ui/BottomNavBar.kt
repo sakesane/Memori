@@ -1,4 +1,4 @@
-package com.example.memoriuitest.ui
+package com.example.memori.ui
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.memoriuitest.R
 
 @Composable
 fun BottomNavBar(
@@ -37,7 +36,7 @@ fun BottomNavBar(
                         0 -> Icon(Icons.Default.Home, contentDescription = "主页面")
                         1 -> Icon(Icons.Default.Star, contentDescription = "智能")
                         2 -> Icon(
-                            painter = painterResource(id = R.drawable.bar_chart_24),
+                            painter = painterResource(id = com.example.memori.R.drawable.bar_chart_24),
                             contentDescription = "统计"
                         )
                         else -> Spacer(modifier = Modifier.size(24.dp))

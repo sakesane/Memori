@@ -1,4 +1,4 @@
-package com.example.memoriuitest.ui
+package com.example.memori.ui
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
@@ -9,11 +9,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.memoriuitest.navigation.AppNavGraph
+import com.example.memori.navigation.AppNavGraph
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
-import com.example.memoriuitest.navigation.Routes
+import com.example.memori.navigation.Routes
 
 @SuppressLint("UnusedCrossfadeTargetStateParameter")
 @Composable

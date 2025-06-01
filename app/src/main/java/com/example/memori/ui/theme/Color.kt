@@ -1,4 +1,4 @@
-package com.example.memoriuitest.ui.theme
+package com.example.memori.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

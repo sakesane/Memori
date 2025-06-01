@@ -1,4 +1,4 @@
-package com.example.memoriuitest.ui.theme
+package com.example.memori.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

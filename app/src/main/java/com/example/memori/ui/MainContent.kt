@@ -1,4 +1,4 @@
-package com.example.memoriuitest.ui
+package com.example.memori.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,11 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.memoriuitest.model.Deck
-import com.example.memoriuitest.ui.theme.wordNewGreen
-import com.example.memoriuitest.ui.theme.reviewPurple
+import com.example.memori.model.Deck
+import com.example.memori.ui.theme.wordNewGreen
+import com.example.memori.ui.theme.reviewPurple
 import androidx.navigation.NavController
-import com.example.memoriuitest.navigation.Routes
+import com.example.memori.navigation.Routes
 
 @Composable
 fun MainContent(
