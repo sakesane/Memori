@@ -1,4 +1,4 @@
-package com.example.memori.ui
+package com.example.memori.ui.bars
 
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size

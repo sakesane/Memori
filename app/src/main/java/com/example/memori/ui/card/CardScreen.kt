@@ -1,4 +1,4 @@
-package com.example.memori.ui
+package com.example.memori.ui.card
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

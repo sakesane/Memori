@@ -1,4 +1,4 @@
-package com.example.memori.ui
+package com.example.memori.ui.smart
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @Composable
-fun StatsContent(
+fun SmartContent(
     navController: NavController
 ) {
     Column(
@@ -19,7 +19,7 @@ fun StatsContent(
             .padding(horizontal = 16.dp)
     ) {
         Text(
-            text = "统计页面内容",
+            text = "智能页面内容",
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 24.dp, bottom = 16.dp, start = 16.dp, end = 16.dp),
@@ -27,6 +27,6 @@ fun StatsContent(
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onBackground
         )
-        // 这里可以添加更多统计相关内容
+        // 这里可以添加更多智能相关内容
     }
 }

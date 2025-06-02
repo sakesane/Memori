@@ -1,4 +1,4 @@
-package com.example.memori.ui
+package com.example.memori.ui.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,29 +11,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.memori.model.Deck
+import com.example.memori.database.entity.Deck
 import com.example.memori.ui.theme.wordNewGreen
 import com.example.memori.ui.theme.reviewPurple
 import androidx.navigation.NavController
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.memori.navigation.Routes
 
 @Composable
 fun MainContent(
-    navController: NavController
+    navController: NavController,
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
-    // 示例数据
-    val decks = remember {
-        listOf(
-            Deck(1, "卡组1", 5, 3, subDecks = listOf(
-                Deck(11, "子卡组1A", 2, 1),
-                Deck(12, "子卡组1B", 3, 2)
-            )),
-            Deck(2, "卡组2", 4, 0),
-            Deck(3, "卡组3", 0, 5)
-        )
-    }
-    var expandedDecks by remember { mutableStateOf(setOf<Int>()) }
-    val wordCount = 15
+    val decks by viewModel.decks.collectAsState()
+    var expandedDecks by remember { mutableStateOf(setOf<Long>()) }
+    val wordCount = decks.sumOf { it.newCount + it.reviewCount }
 
     Column(
         modifier = Modifier
@@ -56,7 +48,7 @@ fun MainContent(
             modifier = Modifier.weight(1f),
             onDeckClick = { deckId ->
                 navController.navigate(Routes.CARD_WITH_ARG.replace("{deckId}", deckId.toString())){
-                    popUpTo(Routes.MAIN)
+                    popUpTo(Routes.HOME)
                 }
             }
         )
@@ -79,14 +71,24 @@ fun LearnProgressText(wordCount: Int) {
 @Composable
 fun DeckList(
     decks: List<Deck>,
-    expandedDecks: Set<Int>,
-    onToggleExpand: (Int) -> Unit,
+    expandedDecks: Set<Long>,
+    onToggleExpand: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    onDeckClick: ((Int) -> Unit)? = null
+    onDeckClick: ((Long) -> Unit)? = null,
+    parentId: Long? = null,
+    indent: Int = 0
 ) {
-    LazyColumn(modifier = modifier) {
-        items(decks) { deck ->
-            DeckItem(deck, expandedDecks, onToggleExpand, onDeckClick = onDeckClick)
+    val children = decks.filter { it.parentId == parentId }
+    Column(modifier = modifier) {
+        children.forEach { deck ->
+            DeckItem(
+                deck = deck,
+                decks = decks,
+                expandedDecks = expandedDecks,
+                onToggleExpand = onToggleExpand,
+                onDeckClick = onDeckClick,
+                indent = indent
+            )
         }
     }
 }
@@ -94,28 +96,30 @@ fun DeckList(
 @Composable
 fun DeckItem(
     deck: Deck,
-    expandedDecks: Set<Int>,
-    onToggleExpand: (Int) -> Unit,
-    indent: Int = 0,
-    onDeckClick: ((Int) -> Unit)? = null
+    decks: List<Deck>,
+    expandedDecks: Set<Long>,
+    onToggleExpand: (Long) -> Unit,
+    onDeckClick: ((Long) -> Unit)? = null,
+    indent: Int = 0
 ) {
+    val hasChildren = decks.any { it.parentId == deck.deckId }
     Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = (indent * 16).dp, end = 16.dp, top = 12.dp, bottom = 12.dp)
                 .let { m ->
-                    if (onDeckClick != null) m.clickable { onDeckClick(deck.id) } else m
+                    if (onDeckClick != null) m.clickable { onDeckClick(deck.deckId) } else m
                 },
             verticalAlignment = Alignment.CenterVertically
         ) {
             Spacer(modifier = Modifier.width(24.dp))
-            if (deck.subDecks.isNotEmpty()) {
+            if (hasChildren) {
                 IconButton(
-                    onClick = { onToggleExpand(deck.id) },
+                    onClick = { onToggleExpand(deck.deckId) },
                     modifier = Modifier.size(24.dp)
                 ) {
-                    Text(if (deck.id in expandedDecks) "-" else "+")
+                    Text(if (deck.deckId in expandedDecks) "-" else "+")
                 }
             } else {
                 Spacer(modifier = Modifier.size(24.dp))
@@ -145,10 +149,15 @@ fun DeckItem(
                 )
             }
         }
-        if (deck.id in expandedDecks && deck.subDecks.isNotEmpty()) {
-            deck.subDecks.forEach { subDeck ->
-                DeckItem(subDeck, expandedDecks, onToggleExpand, indent = indent + 1, onDeckClick = onDeckClick)
-            }
+        if (deck.deckId in expandedDecks && hasChildren) {
+            DeckList(
+                decks = decks,
+                expandedDecks = expandedDecks,
+                onToggleExpand = onToggleExpand,
+                onDeckClick = onDeckClick,
+                parentId = deck.deckId,
+                indent = indent + 1
+            )
         }
     }
 }

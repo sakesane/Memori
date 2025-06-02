@@ -14,6 +14,8 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
 import com.example.memori.navigation.Routes
+import com.example.memori.ui.bars.BottomNavBar
+import com.example.memori.ui.bars.TopNavBar
 
 @SuppressLint("UnusedCrossfadeTargetStateParameter")
 @Composable
@@ -21,7 +23,7 @@ fun AppScaffold(navController: NavHostController) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val selectedIndex = when (currentRoute) {
-        Routes.MAIN -> 0
+        Routes.HOME -> 0
         Routes.SMART -> 1
         Routes.STATS -> 2
         else -> 0 // 默认主页面

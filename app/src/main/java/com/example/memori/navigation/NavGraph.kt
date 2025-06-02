@@ -6,13 +6,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.example.memori.ui.MainContent
-import com.example.memori.ui.SmartContent
-import com.example.memori.ui.StatsContent
-import com.example.memori.ui.CardScreen
+import com.example.memori.ui.home.MainContent
+import com.example.memori.ui.smart.SmartContent
+import com.example.memori.ui.stats.StatsContent
+import com.example.memori.ui.card.CardScreen
 
 object Routes {
-    const val MAIN = "main"
+    const val HOME = "home"
     const val STATS = "stats"
     const val SMART = "smart"
     const val CARD = "card"
@@ -20,12 +20,12 @@ object Routes {
 }
 
 @Composable
-fun AppNavGraph(navController: NavHostController, startDestination: String = "main") {
+fun AppNavGraph(navController: NavHostController, startDestination: String = "home") {
     NavHost(
         navController = navController,
         startDestination = startDestination
     ) {
-        composable(Routes.MAIN) { MainContent(navController) }
+        composable(Routes.HOME) { MainContent(navController) }
         composable(Routes.STATS) { StatsContent(navController) }
         composable(Routes.SMART) { SmartContent(navController) }
         composable(
