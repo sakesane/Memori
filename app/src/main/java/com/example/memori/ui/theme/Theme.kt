@@ -20,30 +20,33 @@ val ColorScheme.reviewPurple: Color
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
+    onPrimary = Color.White,
     secondary = PurpleGrey80,
-    tertiary = Pink80
+    onSecondary = Color.White,
+    tertiary = Pink80,
+    onTertiary = Color.White,
+    background = Color(0xFF121212),
+    onBackground = Color(0xFFEDEDED),
+    surface = Color(0xFF1E1E1E),
+    onSurface = Color(0xFFEDEDED)
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
-
-    /* Other default colors to override
-    background = Color(0xFFFFFBFE),
-    surface = Color(0xFFFFFBFE),
     onPrimary = Color.White,
+    secondary = PurpleGrey40,
     onSecondary = Color.White,
+    tertiary = Pink40,
     onTertiary = Color.White,
+    background = Color(0xFFE7DDE4),
     onBackground = Color(0xFF1C1B1F),
-    onSurface = Color(0xFF1C1B1F),
-    */
+    surface = Color(0xFFE7DDE4),
+    onSurface = Color(0xFF1C1B1F)
 )
 
 @Composable
 fun MemoriUITestTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {

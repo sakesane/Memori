@@ -6,7 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
-import com.example.memori.ui.home.MainContent
+import com.example.memori.ui.home.HomeContent
 import com.example.memori.ui.smart.SmartContent
 import com.example.memori.ui.stats.StatsContent
 import com.example.memori.ui.card.CardScreen
@@ -25,7 +25,7 @@ fun AppNavGraph(navController: NavHostController, startDestination: String = "ho
         navController = navController,
         startDestination = startDestination
     ) {
-        composable(Routes.HOME) { MainContent(navController) }
+        composable(Routes.HOME) { HomeContent(navController) }
         composable(Routes.STATS) { StatsContent(navController) }
         composable(Routes.SMART) { SmartContent(navController) }
         composable(

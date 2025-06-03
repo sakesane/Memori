@@ -12,6 +12,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.memori.navigation.AppNavGraph
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import com.example.memori.navigation.Routes
 import com.example.memori.ui.bars.BottomNavBar
@@ -39,7 +40,11 @@ fun AppScaffold(navController: NavHostController) {
             topBar = { TopNavBar() },
             bottomBar = { BottomNavBar(selectedIndex = selectedIndex, navController = navController) }
         ) { innerPadding ->
-            Box(modifier = Modifier.padding(innerPadding)) {
+            Box(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .background(androidx.compose.material3.MaterialTheme.colorScheme.background)
+                ) {
                 Crossfade(
                         targetState = currentRoute,
                         animationSpec = tween(durationMillis = 0)

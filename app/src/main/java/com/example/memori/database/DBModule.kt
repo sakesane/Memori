@@ -24,13 +24,4 @@ object DatabaseModule {
             FILE_NAME
         ).build()
     }
-
-    @Provides
-    fun provideDeckDao(db: MemoriDB): DeckDao = db.deckDao()
-
-    @Provides
-    fun provideCardDao(db: MemoriDB): CardDao = db.cardDao()
-
-    @Provides
-    fun provideRevlogDao(db: MemoriDB): RevlogDao = db.revlogDao()
 }

@@ -1,6 +1,7 @@
 package com.example.memori.ui.bars
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -17,8 +18,11 @@ fun BottomNavBar(
     selectedIndex: Int, // 传入当前页面，保证点击时不会重复导航
     navController: NavController
 ) {
-    val routes = listOf("main", "smart", "stats")
-    NavigationBar {
+    val routes = listOf("home", "smart", "stats")
+    val labels = listOf("主页", "AI", "统计")
+    NavigationBar(
+        modifier = Modifier.height(88.dp) // 调整底栏高度
+    ) {
         routes.forEachIndexed { index, route ->
             NavigationBarItem(
                 selected = index == selectedIndex,
@@ -42,7 +46,12 @@ fun BottomNavBar(
                         else -> Spacer(modifier = Modifier.size(24.dp))
                     }
                 },
-                label = null
+                label = {
+                    Text(
+                        text = labels[index],
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                },
             )
         }
     }

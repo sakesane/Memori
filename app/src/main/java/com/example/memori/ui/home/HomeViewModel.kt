@@ -2,6 +2,7 @@ package com.example.memori.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.memori.database.MemoriDB
 import com.example.memori.database.dao.DeckDao
 import com.example.memori.database.entity.Deck
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,8 +13,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val deckDao: DeckDao
+    private val db: MemoriDB
 ) : ViewModel() {
+    private val deckDao = db.deckDao()
     private val _decks = MutableStateFlow<List<Deck>>(emptyList())
     val decks: StateFlow<List<Deck>> = _decks
 

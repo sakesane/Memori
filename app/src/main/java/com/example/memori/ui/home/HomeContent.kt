@@ -2,8 +2,6 @@ package com.example.memori.ui.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,10 +17,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.memori.navigation.Routes
 
 @Composable
-fun MainContent(
+fun HomeContent(
     navController: NavController,
-    viewModel: HomeViewModel = hiltViewModel()
 ) {
+    val viewModel: HomeViewModel = hiltViewModel()
     val decks by viewModel.decks.collectAsState()
     var expandedDecks by remember { mutableStateOf(setOf<Long>()) }
     val wordCount = decks.sumOf { it.newCount + it.reviewCount }
