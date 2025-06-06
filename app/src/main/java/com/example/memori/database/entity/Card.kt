@@ -4,6 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import java.util.Date
 
 @Entity(
     tableName = "cards",
@@ -17,13 +18,14 @@ import androidx.room.PrimaryKey
 )
 data class Card(
     @PrimaryKey(autoGenerate = true) val cardId: Long = 0,
-    val deckId: Long,      // 所属牌组
-    val front: String,     // 正面内容
-    val back: String,      // 背面内容
-    val due: Long,         // 下次复习时间（时间戳）
-    val interval: Int,     // 间隔天数
-    val ease: Int,         // 记忆强度
-    val reps: Int,         // 复习次数
-    val lapses: Int,       // 失败次数
-    val type: Int          // 卡片类型（新卡、复习卡等）
+    val deckId: Long,                   // 关联的卡组ID
+    val due: Date,
+    val stability: Double,
+    val difficulty: Double,
+    val elapsedDays: Double,
+    val scheduledDays: Double,
+    val reps: Int,
+    val lapses: Int,
+    val status: String,
+    val lastReview: Date
 )

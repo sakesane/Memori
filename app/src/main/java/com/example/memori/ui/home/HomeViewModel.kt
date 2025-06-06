@@ -3,7 +3,6 @@ package com.example.memori.ui.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.memori.database.MemoriDB
-import com.example.memori.database.dao.DeckDao
 import com.example.memori.database.entity.Deck
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

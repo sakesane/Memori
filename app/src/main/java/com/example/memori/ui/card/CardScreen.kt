@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.memori.ui.home.HomeViewModel
 
 /**
  * 主卡片滑动界面
@@ -24,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxSize
  */
 @Composable
 fun CardScreen(deckId: String?) {
+    val viewModel: HomeViewModel = hiltViewModel()
     val context = LocalContext.current
     var cardIndex by remember { mutableStateOf(0) }
     val cards = listOf("卡片A", "卡片B", "卡片C")
