@@ -1,6 +1,8 @@
 package com.example.memori.algorithm
 
-import java.util.Date
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
+import java.time.Duration
 import java.util.concurrent.TimeUnit
 import kotlin.math.exp
 import kotlin.math.max
@@ -24,13 +26,17 @@ enum class Rating(val description: String) {
     fun value(): Int {
         return ordinal + 1
     }
+
+    override fun toString(): String {
+        return description
+    }
 }
 
 class ReviewLog(
     var rating: Rating,         // 用户评分
     var elapsedDays: Double,    // 距离上次复习经过的天数
     var scheduledDays: Double,  // 计划间隔天数
-    var review: Date,           // 复习时间
+    var review: LocalDateTime,  // 复习时间
     var status: Status          // 复习时卡片状态
 ) {
     // 转为Map，便于序列化
@@ -47,7 +53,7 @@ class ReviewLog(
 
 class FSRSCard : Cloneable {
 
-    var due: Date = Date()              // 下次复习时间
+    var due: LocalDateTime = LocalDateTime.now()         // 下次复习时间
     var stability: Double = 0.0         // 稳定性（记忆保持能力）
     var difficulty: Double = 0.0        // 难度
     var elapsedDays: Double = 0.0       // 距离上次复习经过的天数
@@ -55,7 +61,7 @@ class FSRSCard : Cloneable {
     var reps: Int = 0                   // 复习次数
     var lapses: Int = 0                 // 遗忘次数
     var status: Status = Status.New     // 当前状态
-    var lastReview: Date = Date()       // 上次复习时间
+    var lastReview: LocalDateTime = LocalDateTime.now()       // 上次复习时间
 
     constructor()
 
@@ -115,7 +121,7 @@ class SchedulingInfo {
     }
 
     // 通过评分、参考卡片、当前卡片和复习时间生成日志
-    constructor(rating: Rating, reference: FSRSCard, current: FSRSCard, review: Date) {
+    constructor(rating: Rating, reference: FSRSCard, current: FSRSCard, review: LocalDateTime) {
         this.card = reference
         this.reviewLog = ReviewLog(rating, reference.scheduledDays, current.elapsedDays, review, current.status)
     }
@@ -171,7 +177,7 @@ class SchedulingCards {
     /**
      * 安排四种评分下的下次复习时间
      */
-    fun schedule(now: Date, hardInterval: Double, goodInterval: Double, easyInterval: Double) {
+    fun schedule(now: LocalDateTime, hardInterval: Double, goodInterval: Double, easyInterval: Double) {
         again.scheduledDays = 0.0
         hard.scheduledDays = hardInterval
         good.scheduledDays = goodInterval
@@ -187,14 +193,19 @@ class SchedulingCards {
     }
 
     // 辅助方法：给定时间加上指定单位的数值
-    fun addTime(now: Date, value: Long, unit: TimeUnit): Date {
-        return Date(now.time + unit.toMillis(value))
+    fun addTime(now: LocalDateTime, value: Long, unit: TimeUnit): LocalDateTime {
+        return when (unit) {
+            TimeUnit.MINUTES -> now.plusMinutes(value)
+            TimeUnit.HOURS -> now.plusHours(value)
+            TimeUnit.DAYS -> now.plusDays(value)
+            else -> now
+        }
     }
 
     /**
      * 记录四种评分下的调度信息
      */
-    fun recordLog(card: FSRSCard, now: Date): Map<Rating, SchedulingInfo> {
+    fun recordLog(card: FSRSCard, now: LocalDateTime): Map<Rating, SchedulingInfo> {
         return mapOf(
             Rating.Again to SchedulingInfo(Rating.Again, again, card, now),
             Rating.Hard to SchedulingInfo(Rating.Hard, hard, card, now),
@@ -263,14 +274,17 @@ class FSRS {
      * @param now 当前时间
      * @return 四种评分下的调度信息
      */
-    fun `repeat`(card: FSRSCard, now: Date): Map<Rating, SchedulingInfo> {
+    fun `repeat`(card: FSRSCard, now: LocalDateTime): Map<Rating, SchedulingInfo> {
         val card = card.clone() as FSRSCard
 
         // 计算距离上次复习的天数
         if (card.status == Status.New) {
             card.elapsedDays = 0.0
         } else {
-            card.elapsedDays = max(0.0, TimeUnit.MILLISECONDS.toDays(now.time - card.lastReview.time).toDouble())
+            card.elapsedDays = max(
+                0.0,
+                ChronoUnit.DAYS.between(card.lastReview, now).toDouble()
+            )
         }
 
         println("Elapsed ${card.elapsedDays}")

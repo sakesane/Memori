@@ -9,32 +9,28 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.unit.dp
+import com.example.memori.database.entity.Card
 
 /**
- * 卡片内容组件，显示卡片的 DeckId、内容文本和滑动方向提示
+ * 卡片内容组件，显示卡片的 DeckId、内容文本
  */
 @Composable
-fun CardContent(deckId: String?, text: String, dragDirection: String? = null) {
+fun CardContent(card: Card, isFlipped: Boolean) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "卡片界面 DeckId: $deckId")
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = text)
-        Spacer(modifier = Modifier.height(16.dp))
-        // 如果有滑动方向提示，则显示
-        dragDirection?.let {
-            Text(
-                text = it,
-                modifier = Modifier
-                    .alpha(0.7f)
-                    .padding(top = 16.dp)
-            )
+        if (!isFlipped) {
+            card.front?.let { Text(text = it) } // 面内容
+        } else {
+            card.back?.let { Text(text = it) } // 背面内容
+            card.example?.let {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(text = it)
+            }
         }
     }
 }

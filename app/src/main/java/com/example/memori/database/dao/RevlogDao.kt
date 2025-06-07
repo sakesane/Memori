@@ -4,7 +4,7 @@ import androidx.room.*
 import com.example.memori.database.entity.Revlog
 
 @Dao
-interface RevLogDao {
+interface RevlogDao {
     @Insert
     suspend fun insertRevLog(revLog: Revlog): Long
 

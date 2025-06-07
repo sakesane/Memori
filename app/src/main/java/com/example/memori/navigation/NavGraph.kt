@@ -32,7 +32,7 @@ fun AppNavGraph(navController: NavHostController, startDestination: String = "ho
             Routes.CARD_WITH_ARG,
             arguments = listOf(navArgument("deckId") { type = NavType.StringType })
         ) { backStackEntry ->
-            CardScreen(deckId = backStackEntry.arguments?.getString("deckId"))
+            CardScreen(deckId = backStackEntry.arguments?.getString("deckId")?.toLongOrNull() ?: 0L)
         }
     }
 }

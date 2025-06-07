@@ -2,6 +2,7 @@ package com.example.memori.database.dao
 
 import androidx.room.*
 import com.example.memori.database.entity.Card
+import java.time.LocalDateTime
 
 @Dao
 interface CardDao {
@@ -19,4 +20,27 @@ interface CardDao {
 
     @Query("SELECT * FROM cards")
     suspend fun getAllCards(): List<Card>
+
+    @Query("""
+        SELECT * FROM cards 
+        WHERE deckId = :deckId 
+        AND due < :until
+        ORDER BY due ASC
+    """)
+    suspend fun getDueCardsByDeck(
+        deckId: Long,
+        until: LocalDateTime
+    ): List<Card>
+
+    @Query("""
+        SELECT * FROM cards
+        WHERE deckId = :deckId
+        AND status = 'New'
+        ORDER BY cardId ASC
+        LIMIT :limit
+    """)
+    suspend fun getNewCardsByDeck(
+        deckId: Long,
+        limit: Int
+    ): List<Card>
 }

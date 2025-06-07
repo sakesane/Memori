@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,8 +21,27 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SwipeTipDialog(
     visible: Boolean,
-    text: String,
+    rating: String,
+    schedule: Double
 ) {
+    // 时间格式化
+    fun formatSchedule(days: Double): String {
+        return when {
+            days < 1.0 -> {
+                val totalMinutes = (days * 24 * 60).toInt()
+                val hours = totalMinutes / 60
+                val minutes = totalMinutes % 60
+                when {
+                    hours > 0 && minutes > 0 -> "${hours}小时${minutes}分钟"
+                    hours > 0 -> "${hours}小时"
+                    else -> "${minutes}分钟"
+                }
+            }
+            days < 30 -> "${days.toInt()}天"
+            else -> String.format("%.1f月", days / 30.0)
+        }
+    }
+
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(animationSpec = tween(200)),
@@ -38,11 +58,18 @@ fun SwipeTipDialog(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = text,
-                color = androidx.compose.material3.MaterialTheme.colorScheme.surface,
-                style = androidx.compose.material3.MaterialTheme.typography.titleMedium
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = rating,
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.surface,
+                    style = androidx.compose.material3.MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = formatSchedule(schedule),
+                    color = androidx.compose.material3.MaterialTheme.colorScheme.surface,
+                    style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
+                )
+            }
         }
     }
 }

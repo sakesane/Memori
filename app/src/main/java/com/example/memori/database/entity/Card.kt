@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import java.util.Date
+import java.time.LocalDateTime
 
 @Entity(
     tableName = "cards",
@@ -19,7 +19,7 @@ import java.util.Date
 data class Card(
     @PrimaryKey(autoGenerate = true) val cardId: Long = 0,
     val deckId: Long,                   // 关联的卡组ID
-    val due: Date,
+    val due: LocalDateTime,
     val stability: Double,
     val difficulty: Double,
     val elapsedDays: Double,
@@ -27,5 +27,10 @@ data class Card(
     val reps: Int,
     val lapses: Int,
     val status: String,
-    val lastReview: Date
+    val lastReview: LocalDateTime,
+    // 为了防止mapper报错，设置为可空
+    val front: String? = null, // 翻转前
+    val back: String? = null,  // 翻转后
+    val example: String? = null
+    // 现在还没有语音内容
 )

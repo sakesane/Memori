@@ -22,6 +22,6 @@ object DatabaseModule {
             context,
             MemoriDB::class.java,
             FILE_NAME
-        ).build()
+        ).fallbackToDestructiveMigration().build()
     }
 }

@@ -20,5 +20,6 @@ data class Deck(
     val name: String,
     val newCount: Int,
     val reviewCount: Int,
+    val newCardLimit: Int = 10,
     val parentId: Long? = null // 顶级卡组为 null，子卡组指向父卡组 id
 )

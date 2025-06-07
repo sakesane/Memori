@@ -1,7 +1,9 @@
 package com.example.memori.ui.card
 
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
@@ -17,19 +19,31 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.memori.ui.home.HomeViewModel
+import com.example.memori.algorithm.Rating
+import java.time.LocalDateTime
 
 /**
  * 主卡片滑动界面
  * 支持卡片四向滑动，滑动时有动画和方向提示，滑出后自动切换到下一张卡片
  */
 @Composable
-fun CardScreen(deckId: String?) {
-    val viewModel: HomeViewModel = hiltViewModel()
+fun CardScreen(deckId: Long) {
+    val vm: CardViewModel = hiltViewModel()
     val context = LocalContext.current
     var cardIndex by remember { mutableStateOf(0) }
-    val cards = listOf("卡片A", "卡片B", "卡片C")
+
+    // 是否已翻开（false = 题面，true = 答面）
+    var isFlipped by remember { mutableStateOf(false) }
+
+    // 获取卡片队列
+    val cards by vm.cardQueue.observeAsState(emptyList())
+
+    // 首次加载卡片队列，传入本机当前时间
+    LaunchedEffect(deckId) {
+        vm.loadCardQueue(deckId, LocalDateTime.now())
+    }
 
     // 动画状态
     val offsetX = remember { Animatable(0f) }
@@ -40,7 +54,7 @@ fun CardScreen(deckId: String?) {
 
     // 弹窗相关状态
     var showTip by remember { mutableStateOf(false) }
-    var tipText by remember { mutableStateOf("") }
+    var tipTextRating by remember { mutableStateOf("") }
 
     // 滑动阈值和滑出距离
     val density = LocalContext.current.resources.displayMetrics.density
@@ -57,120 +71,152 @@ fun CardScreen(deckId: String?) {
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopInfo()
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        top = 16.dp,
-                        start = 24.dp,
-                        end = 24.dp,
-                        bottom = 24.dp
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                // 下一张卡片（z轴下方）
-                val nextIndex = (cardIndex + 1) % cards.size
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    shape = androidx.compose.material3.MaterialTheme.shapes.medium,
-                    tonalElevation = 19.dp
-                ) {
-                    CardContent(deckId = deckId, text = cards[nextIndex])
-                }
-                // 当前卡片（z轴上方，带动画和手势）
-                Surface(
-                    shape = androidx.compose.material3.MaterialTheme.shapes.medium,
-                    tonalElevation = 20.dp,
+
+            // 队列非空时
+            if (cards.isNotEmpty()){
+                val currentCard = cards[cardIndex % cards.size]
+                val nextCard = cards[(cardIndex + 1) % cards.size]
+
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .graphicsLayer {
-                            translationX = offsetX.value
-                            translationY = offsetY.value
-                            this.alpha = alpha.value
-                            rotationZ = rotation.value
-                        }
-                        .pointerInput(cardIndex) {
-                            var totalDx = 0f
-                            var totalDy = 0f
-                            detectDragGestures(
-                                onDragStart = {
-                                    totalDx = 0f
-                                    totalDy = 0f
-                                    // 不再设置dragDirection
-                                },
-                                onDrag = { _, dragAmount ->
-                                    totalDx += dragAmount.x
-                                    totalDy += dragAmount.y
-                                    if (abs(totalDx) > abs(totalDy)) {
-                                        totalDy = 0f
-                                        totalDx = totalDx.coerceIn(-maxOffsetPx, maxOffsetPx)
-                                    } else {
-                                        totalDx = 0f
-                                        totalDy = totalDy.coerceIn(-maxOffsetPx, maxOffsetPx)
-                                    }
-                                    // 不再实时显示滑动方向
-                                    scope.launch {
-                                        offsetX.snapTo(totalDx)
-                                        offsetY.snapTo(totalDy)
-                                        rotation.snapTo(totalDx / 20f)
-                                    }
-                                },
-                                onDragEnd = {
-                                    val direction = when {
-                                        totalDx >= maxOffsetPx -> "向右滑动"
-                                        totalDx <= -maxOffsetPx -> "向左滑动"
-                                        totalDy >= maxOffsetPx -> "向下滑动"
-                                        totalDy <= -maxOffsetPx -> "向上滑动"
-                                        else -> null
-                                    }
-                                    if (direction != null) {
-                                        // 弹窗提示
-                                        tipText = direction
-                                        showTip = true
-                                        scope.launch {
-                                            kotlinx.coroutines.delay(400)
-                                            showTip = false
-                                        }
-                                        // 滑走动画+渐隐，切换到新卡片
-                                        scope.launch {
-                                            val (targetX, targetY) = when {
-                                                totalDx >= maxOffsetPx -> slideOutDistance to 0f
-                                                totalDx <= -maxOffsetPx -> -slideOutDistance to 0f
-                                                totalDy >= maxOffsetPx -> 0f to slideOutDistance
-                                                totalDy <= -maxOffsetPx -> 0f to -slideOutDistance
-                                                else -> 0f to 0f
-                                            }
-                                            if (targetX != 0f) {
-                                                launch { offsetX.animateTo(targetX, animationSpec = tween(200)) }
-                                                launch { offsetY.animateTo(0f, animationSpec = tween(200)) }
-                                            } else if (targetY != 0f) {
-                                                launch { offsetY.animateTo(targetY, animationSpec = tween(200)) }
-                                                launch { offsetX.animateTo(0f, animationSpec = tween(200)) }
-                                            }
-                                            alpha.animateTo(0f, animationSpec = tween(200))
-                                            // 切换到新卡片
-                                            offsetX.snapTo(0f)
-                                            offsetY.snapTo(0f)
-                                            rotation.snapTo(0f)
-                                            alpha.snapTo(1f)
-                                            cardIndex = (cardIndex + 1) % cards.size
-                                            // 新卡片渐变出现等...
-                                        }
-                                    } else {
-                                        // 未达到阈值，回弹动画
-                                        scope.launch {
-                                            offsetX.animateTo(0f, animationSpec = tween(200))
-                                            offsetY.animateTo(0f, animationSpec = tween(200))
-                                            rotation.animateTo(0f, animationSpec = tween(200))
-                                        }
-                                    }
-                                }
-                            )
-                        }
+                        .padding(
+                            top = 16.dp,
+                            start = 24.dp,
+                            end = 24.dp,
+                            bottom = 24.dp
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
-                    CardContent(deckId = deckId, text = cards[cardIndex])
+                    // 下一张卡片
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        shape = androidx.compose.material3.MaterialTheme.shapes.medium,
+                        tonalElevation = 19.dp
+                    ) {
+                        CardContent(card = nextCard, isFlipped = false)
+                    }
+                    // 当前卡片
+                    val scale = animateFloatAsState(if (!isFlipped) 1f else 0.97f, label = "scaleAnim")
+                    Surface(
+                        shape = androidx.compose.material3.MaterialTheme.shapes.medium,
+                        tonalElevation = 20.dp,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .graphicsLayer {
+                                translationX = offsetX.value
+                                translationY = offsetY.value
+                                this.alpha = alpha.value
+                                rotationZ = rotation.value
+                                scaleX = scale.value
+                                scaleY = scale.value
+                            }
+                            // 手势处理
+                            .pointerInput(cardIndex, isFlipped) {
+                                var totalDx = 0f
+                                var totalDy = 0f
+                                if (isFlipped) {
+                                    detectDragGestures(
+                                        onDragStart = {
+                                            totalDx = 0f
+                                            totalDy = 0f
+                                        },
+                                        // 处理拖动事件
+                                        onDrag = { _, dragAmount ->
+                                            totalDx += dragAmount.x
+                                            totalDy += dragAmount.y
+                                            if (abs(totalDx) > abs(totalDy)) {
+                                                totalDy = 0f
+                                                totalDx = totalDx.coerceIn(-maxOffsetPx, maxOffsetPx)
+                                            } else {
+                                                totalDx = 0f
+                                                totalDy = totalDy.coerceIn(-maxOffsetPx, maxOffsetPx)
+                                            }
+                                            scope.launch {
+                                                offsetX.snapTo(totalDx)
+                                                offsetY.snapTo(totalDy)
+                                                rotation.snapTo(totalDx / 20f)
+                                            }
+                                        },
+                                        // 处理拖动结束事件
+                                        onDragEnd = {
+                                            val direction = when {
+                                                // left, up, right, down
+                                                totalDx <= -maxOffsetPx -> "left"
+                                                totalDy <= -maxOffsetPx -> "up"
+                                                totalDx >= maxOffsetPx -> "right"
+                                                totalDy >= maxOffsetPx -> "down"
+                                                else -> null
+                                            }
+                                            // 方向与Rating的映射
+                                            val rating = when (direction) {
+                                                "up" -> Rating.Again
+                                                "left" -> Rating.Hard
+                                                "down" -> Rating.Good
+                                                "right" -> Rating.Easy
+                                                else -> null
+                                            }
+                                            tipTextRating = rating.toString()
+                                            // 调用评分反馈
+                                            if (rating != null) {
+                                                vm.onCardRated(currentCard, rating)
+                                            }
+                                            // 提示弹窗
+                                            if (direction != null) {
+                                                showTip = true
+                                                scope.launch {
+                                                    kotlinx.coroutines.delay(400)
+                                                    showTip = false
+                                                }
+                                                // 滑走动画+渐隐，切换到新卡片
+                                                scope.launch {
+                                                    val (targetX, targetY) = when {
+                                                        totalDx >= maxOffsetPx -> slideOutDistance to 0f
+                                                        totalDx <= -maxOffsetPx -> -slideOutDistance to 0f
+                                                        totalDy >= maxOffsetPx -> 0f to slideOutDistance
+                                                        totalDy <= -maxOffsetPx -> 0f to -slideOutDistance
+                                                        else -> 0f to 0f
+                                                    }
+                                                    if (targetX != 0f) {
+                                                        launch { offsetX.animateTo(targetX, animationSpec = tween(200)) }
+                                                        launch { offsetY.animateTo(0f, animationSpec = tween(200)) }
+                                                    } else if (targetY != 0f) {
+                                                        launch { offsetY.animateTo(targetY, animationSpec = tween(200)) }
+                                                        launch { offsetX.animateTo(0f, animationSpec = tween(200)) }
+                                                    }
+                                                    alpha.animateTo(0f, animationSpec = tween(200))
+                                                    // 切换到新卡片
+                                                    offsetX.snapTo(0f)
+                                                    offsetY.snapTo(0f)
+                                                    rotation.snapTo(0f)
+                                                    alpha.snapTo(1f)
+                                                    cardIndex = (cardIndex + 1) % cards.size
+                                                    // 新卡片渐变出现等...
+                                                }
+                                            } else {
+                                                // 未达到阈值，回弹动画
+                                                scope.launch {
+                                                    offsetX.animateTo(0f, animationSpec = tween(100))
+                                                    offsetY.animateTo(0f, animationSpec = tween(100))
+                                                    rotation.animateTo(0f, animationSpec = tween(100))
+                                                }
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                            // 点击事件处理
+                            .clickable(
+                                enabled = !isFlipped, // 只允许未翻开时点击
+                                onClick = { isFlipped = true }
+                            )
+                    ) {
+                        CardContent(card = currentCard, isFlipped = isFlipped)
+                        if (isFlipped) {
+                            SwipeTipDialog(visible = showTip, rating = tipTextRating, schedule = currentCard.scheduledDays)
+                        }
+                    }
                 }
-                SwipeTipDialog(visible = showTip, text = tipText)
             }
         }
     }

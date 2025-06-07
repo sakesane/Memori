@@ -4,7 +4,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import androidx.room.Index
-import java.util.Date
+import java.time.LocalDateTime
 
 @Entity(
     tableName = "revlog",
@@ -22,6 +22,6 @@ data class Revlog(
     val rating: String,
     val elapsedDays: Double,        // 距离上次复习经过的天数
     val scheduledDays: Double,      // 计划间隔天数
-    val review: Date,       // 复习时间
+    val review: LocalDateTime,       // 复习时间
     val status: String          // 当前状态
 )
