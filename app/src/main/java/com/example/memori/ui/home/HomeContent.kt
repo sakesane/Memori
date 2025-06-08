@@ -1,11 +1,13 @@
 package com.example.memori.ui.home
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -15,15 +17,50 @@ import com.example.memori.ui.theme.reviewPurple
 import androidx.navigation.NavController
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.memori.navigation.Routes
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 
 @Composable
 fun HomeContent(
     navController: NavController,
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
-    val viewModel: HomeViewModel = hiltViewModel()
+    // 监听导航返回
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                // 重新加载数据
+                viewModel.refreshDecks()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("memori_prefs", Context.MODE_PRIVATE) }
+    var expandedDecks by remember {
+        mutableStateOf(
+            prefs.getString("expanded_decks", "")
+                ?.split(",")
+                ?.filter { it.isNotBlank() }
+                ?.map { it.toLong() }
+                ?.toSet() ?: setOf()
+        )
+    }
+
+    // 每次 expandedDecks 变化时保存
+    LaunchedEffect(expandedDecks) {
+        prefs.edit().putString("expanded_decks", expandedDecks.joinToString(",")).apply()
+    }
+
     val decks by viewModel.decks.collectAsState()
-    var expandedDecks by remember { mutableStateOf(setOf<Long>()) }
-    val wordCount = decks.sumOf { it.newCount + it.reviewCount }
+    val leafDecks = decks.filter { deck -> decks.none { it.parentId == deck.deckId } }
+    val wordCount = leafDecks.sumOf { (it.newCount ?: 0) + (it.reviewCount ?: 0) }
 
     Column(
         modifier = Modifier

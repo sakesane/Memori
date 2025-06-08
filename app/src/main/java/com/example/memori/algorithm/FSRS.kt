@@ -277,7 +277,6 @@ class FSRS {
     fun `repeat`(card: FSRSCard, now: LocalDateTime): Map<Rating, SchedulingInfo> {
         val card = card.clone() as FSRSCard
 
-        // 计算距离上次复习的天数
         if (card.status == Status.New) {
             card.elapsedDays = 0.0
         } else {

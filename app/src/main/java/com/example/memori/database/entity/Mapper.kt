@@ -21,7 +21,7 @@ fun Card.toFSRSCard(): FSRSCard {
 }
 
 // FSRSCard to Card
-// 新建卡片时候如果传入cardId为0，数据库会自动生成一个新的ID
+// 新建卡片时候如果传入cardId为null，数据库会自动生成一个新的ID
 // 但我不知道更新卡片这样搞行不行，可能要写新的
 fun FSRSCard.toCard(
     cardId: Long = 0,

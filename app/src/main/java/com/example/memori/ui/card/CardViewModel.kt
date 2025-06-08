@@ -28,22 +28,38 @@ class CardViewModel @Inject constructor(
     val cardQueue: LiveData<List<Card>> = _cardQueue
 
     /**
-     * 获取指定deck下的复习卡片和新卡片队列
+     * 递归获取指定deck及其所有子deck的id
+     */
+    private suspend fun getAllSubDeckIds(rootId: Long): List<Long> {
+        val result = mutableListOf<Long>()
+        suspend fun collect(id: Long) {
+            result.add(id)
+            val children = deckDao.getChildren(id)
+            children.forEach { collect(it.deckId) }
+        }
+        collect(rootId)
+        return result
+    }
+
+    /**
+     * 获取指定deck及其所有子deck下的复习卡片和新卡片队列
      * @param deckId 目标卡组ID
-     * @param until 截止时间（应传入当天时间：由用户定义的每日刷新时间决定）
+     * @param until 截止时间
      */
     fun loadCardQueue(deckId: Long, until: LocalDateTime) {
         viewModelScope.launch {
-            // 1. 获取deck，读取新卡上限
+            // 1. 获取所有相关deckId（包括子deck）
+            val allDeckIds = getAllSubDeckIds(deckId)
+            // 2. 获取deck，读取新卡上限
             val deck = deckDao.getAll().find { it.deckId == deckId }
-            val newCardLimit = deck?.newCardLimit ?: 0 // 假设Deck实体有newCardLimit字段
+            val newCardLimit = deck?.newCardLimit ?: 0
 
-            // 2. 获取复习卡片
-            val dueCards = cardDao.getDueCardsByDeck(deckId, until)
-            // 3. 获取新卡片
-            val newCards = cardDao.getNewCardsByDeck(deckId, newCardLimit)
+            // 3. 获取复习卡片
+            val dueCards = cardDao.getDueCardsByDecks(allDeckIds, until)
+            // 4. 获取新卡片
+            val newCards = cardDao.getNewCardsByDecks(allDeckIds, newCardLimit)
 
-            // 4. 合并2、3卡片队列（可自定义混排逻辑）
+            // 5. 合并队列
             val queue = mergeCards(dueCards, newCards)
             _cardQueue.postValue(queue)
         }
@@ -61,16 +77,21 @@ class CardViewModel @Inject constructor(
      */
     fun onCardRated(card: Card, rating: Rating) {
         viewModelScope.launch(Dispatchers.IO) {
-            // 1. 转换为FSRSCard
+            println("原始Card: $card")
             val fsrsCard = card.toFSRSCard()
+            println("转换为FSRSCard: $fsrsCard")
             val now = LocalDateTime.now()
-            // 2. 调用FSRS.repeat
             val fsrs = FSRS()
             val schedulingMap = fsrs.repeat(fsrsCard, now)
-            // 3. 获取用户评分对应的SchedulingInfo
-            val schedulingInfo = schedulingMap[rating] ?: return@launch
+            println("schedulingMap keys: ${schedulingMap.keys}")
+            println("用户评分: $rating")
+            val schedulingInfo = schedulingMap[rating]
+            if (schedulingInfo == null) {
+                println("未找到对应的SchedulingInfo，rating=$rating")
+                return@launch
+            }
             val updatedFSRSCard = schedulingInfo.card
-            // 4. 转回Card，保留原有内容字段
+            println("更新后的FSRSCard: $updatedFSRSCard")
             val updatedCard = updatedFSRSCard.toCard(
                 cardId = card.cardId,
                 deckId = card.deckId
@@ -79,9 +100,9 @@ class CardViewModel @Inject constructor(
                 back = card.back,
                 example = card.example
             )
-            // 5. 更新数据库
+            println("最终用于更新的Card: $updatedCard")
             cardDao.updateCard(updatedCard)
-            // 6. 可选：刷新队列
+            println("数据库已更新")
             loadCardQueue(card.deckId, LocalDateTime.now())
         }
     }

@@ -18,8 +18,8 @@ import androidx.room.PrimaryKey
 data class Deck(
     @PrimaryKey(autoGenerate = true) val deckId: Long = 0,
     val name: String,
-    val newCount: Int,
-    val reviewCount: Int,
-    val newCardLimit: Int = 10,
+    var newCount: Int? = 0,
+    var reviewCount: Int? = 0,
+    var newCardLimit: Int = 5,
     val parentId: Long? = null // 顶级卡组为 null，子卡组指向父卡组 id
 )

@@ -13,7 +13,7 @@ import com.example.memori.database.util.Converters
         Deck::class,
         Revlog::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 

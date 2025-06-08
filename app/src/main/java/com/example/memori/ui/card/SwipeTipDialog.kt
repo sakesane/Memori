@@ -17,12 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import java.time.LocalDateTime
 
 @Composable
 fun SwipeTipDialog(
     visible: Boolean,
     rating: String,
-    schedule: Double
+    due: LocalDateTime
 ) {
     // 时间格式化
     fun formatSchedule(days: Double): String {
@@ -51,7 +52,7 @@ fun SwipeTipDialog(
             modifier = Modifier
                 .width(152.dp)
                 .height(80.dp)
-                .alpha(0.8f)
+                .alpha(0.92f)
                 .clip(RoundedCornerShape(24.dp))
                 .background(
                     color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
@@ -65,7 +66,9 @@ fun SwipeTipDialog(
                     style = androidx.compose.material3.MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = formatSchedule(schedule),
+                    text = formatSchedule(
+                        java.time.Duration.between(due, LocalDateTime.now()).toMinutes().toDouble() / 60 / 24
+                    ),
                     color = androidx.compose.material3.MaterialTheme.colorScheme.surface,
                     style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
                 )

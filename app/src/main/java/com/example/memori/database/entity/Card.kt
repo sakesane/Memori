@@ -18,19 +18,18 @@ import java.time.LocalDateTime
 )
 data class Card(
     @PrimaryKey(autoGenerate = true) val cardId: Long = 0,
-    val deckId: Long,                   // 关联的卡组ID
-    val due: LocalDateTime,
-    val stability: Double,
-    val difficulty: Double,
-    val elapsedDays: Double,
-    val scheduledDays: Double,
-    val reps: Int,
-    val lapses: Int,
-    val status: String,
-    val lastReview: LocalDateTime,
+    val deckId: Long,
+    val due: LocalDateTime = LocalDateTime.now(),
+    val stability: Double = 0.0,
+    val difficulty: Double = 0.0,
+    val elapsedDays: Double = 0.0,
+    val scheduledDays: Double = 0.0,
+    val reps: Int = 0,
+    val lapses: Int = 0,
+    val status: String = "New",
+    val lastReview: LocalDateTime = LocalDateTime.now(),
     // 为了防止mapper报错，设置为可空
     val front: String? = null, // 翻转前
     val back: String? = null,  // 翻转后
     val example: String? = null
-    // 现在还没有语音内容
 )

@@ -97,7 +97,6 @@ fun CardScreen(deckId: Long) {
                         CardContent(card = nextCard, isFlipped = false)
                     }
                     // 当前卡片
-                    val scale = animateFloatAsState(if (!isFlipped) 1f else 0.97f, label = "scaleAnim")
                     Surface(
                         shape = androidx.compose.material3.MaterialTheme.shapes.medium,
                         tonalElevation = 20.dp,
@@ -108,8 +107,6 @@ fun CardScreen(deckId: Long) {
                                 translationY = offsetY.value
                                 this.alpha = alpha.value
                                 rotationZ = rotation.value
-                                scaleX = scale.value
-                                scaleY = scale.value
                             }
                             // 手势处理
                             .pointerInput(cardIndex, isFlipped) {
@@ -168,6 +165,7 @@ fun CardScreen(deckId: Long) {
                                                     kotlinx.coroutines.delay(400)
                                                     showTip = false
                                                 }
+                                                isFlipped = false
                                                 // 滑走动画+渐隐，切换到新卡片
                                                 scope.launch {
                                                     val (targetX, targetY) = when {
@@ -191,7 +189,6 @@ fun CardScreen(deckId: Long) {
                                                     rotation.snapTo(0f)
                                                     alpha.snapTo(1f)
                                                     cardIndex = (cardIndex + 1) % cards.size
-                                                    // 新卡片渐变出现等...
                                                 }
                                             } else {
                                                 // 未达到阈值，回弹动画
@@ -212,10 +209,8 @@ fun CardScreen(deckId: Long) {
                             )
                     ) {
                         CardContent(card = currentCard, isFlipped = isFlipped)
-                        if (isFlipped) {
-                            SwipeTipDialog(visible = showTip, rating = tipTextRating, schedule = currentCard.scheduledDays)
-                        }
                     }
+                    SwipeTipDialog(visible = showTip, rating = tipTextRating, due = currentCard.due)
                 }
             }
         }

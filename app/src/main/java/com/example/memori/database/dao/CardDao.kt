@@ -23,24 +23,46 @@ interface CardDao {
 
     @Query("""
         SELECT * FROM cards 
-        WHERE deckId = :deckId 
+        WHERE deckId IN (:deckIds) 
         AND due < :until
         ORDER BY due ASC
     """)
-    suspend fun getDueCardsByDeck(
-        deckId: Long,
+    suspend fun getDueCardsByDecks(
+        deckIds: List<Long>, 
         until: LocalDateTime
     ): List<Card>
 
     @Query("""
         SELECT * FROM cards
-        WHERE deckId = :deckId
+        WHERE deckId IN (:deckIds)
         AND status = 'New'
         ORDER BY cardId ASC
         LIMIT :limit
     """)
-    suspend fun getNewCardsByDeck(
-        deckId: Long,
+    suspend fun getNewCardsByDecks(
+        deckIds: List<Long>, 
         limit: Int
     ): List<Card>
+
+    @Query("SELECT deckId, COUNT(*) as newCount FROM cards WHERE status = 'New' GROUP BY deckId")
+    suspend fun getNewCountByDeck(): List<DeckNewCount>
+
+    // 虽然名字叫review，实际上是除了New之外的所有状态
+    @Query("""
+        SELECT deckId, COUNT(*) as reviewCount 
+        FROM cards 
+        WHERE status IN ('Learning', 'Review', 'Relearning') 
+        GROUP BY deckId
+    """)
+    suspend fun getReviewCountByDeck(): List<DeckReviewCount>
+
+    data class DeckNewCount(
+        val deckId: Long,
+        val newCount: Int? = 0
+    )
+
+    data class DeckReviewCount(
+        val deckId: Long,
+        val reviewCount: Int? = 0
+    )
 }

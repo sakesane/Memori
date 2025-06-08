@@ -8,6 +8,9 @@ interface DeckDao {
     @Query("SELECT * FROM decks")
     suspend fun getAll(): List<Deck>
 
+    @Query("SELECT * FROM decks WHERE parentId = :parentId")
+    suspend fun getChildren(parentId: Long): List<Deck>
+
     @Insert
     suspend fun insert(deck: Deck): Long
 
