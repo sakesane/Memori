@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.memori.algorithm.Rating
+import com.example.memori.database.util.CustomNewDayTimeConverter
 import java.time.LocalDateTime
 
 /**
@@ -39,10 +40,12 @@ fun CardScreen(deckId: Long) {
 
     // 获取卡片队列
     val cards by vm.cardQueue.observeAsState(emptyList())
-
+    var until = LocalDateTime.now()
+    
     // 首次加载卡片队列，传入本机当前时间
     LaunchedEffect(deckId) {
-        vm.loadCardQueue(deckId, LocalDateTime.now())
+        until = CustomNewDayTimeConverter.getTodayRefreshDateTime(context)
+        vm.loadCardQueue(deckId, until)
     }
 
     // 动画状态
@@ -76,6 +79,7 @@ fun CardScreen(deckId: Long) {
             if (cards.isNotEmpty()){
                 val currentCard = cards[cardIndex % cards.size]
                 val nextCard = cards[(cardIndex + 1) % cards.size]
+                var cardDue = LocalDateTime.now()
 
                 Box(
                     modifier = Modifier
@@ -156,9 +160,15 @@ fun CardScreen(deckId: Long) {
                                             tipTextRating = rating.toString()
                                             // 调用评分反馈
                                             if (rating != null) {
-                                                vm.onCardRated(currentCard, rating)
+                                                vm.onCardRated(currentCard, rating, until)
+                                                scope.launch {
+                                                    // 等待评分和数据库更新完成后再获取最新 due
+                                                    kotlinx.coroutines.delay(100) // 可适当调整等待时间，确保数据库已更新
+                                                    val latestDue = vm.getCardDue(currentCard.cardId)
+                                                    cardDue = latestDue ?: LocalDateTime.now()
+                                                }
                                             }
-                                            // 提示弹窗
+                                            
                                             if (direction != null) {
                                                 showTip = true
                                                 scope.launch {
@@ -210,7 +220,7 @@ fun CardScreen(deckId: Long) {
                     ) {
                         CardContent(card = currentCard, isFlipped = isFlipped)
                     }
-                    SwipeTipDialog(visible = showTip, rating = tipTextRating, due = currentCard.due)
+                    SwipeTipDialog(visible = showTip, rating = tipTextRating, due = cardDue)
                 }
             }
         }

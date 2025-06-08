@@ -1,11 +1,15 @@
 package com.example.memori.ui.home
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.memori.database.MemoriDB
 import com.example.memori.database.entity.Deck
 import com.example.memori.database.entity.Card
+import com.example.memori.database.util.CustomNewDayTimeConverter
+import com.example.memori.database.util.DeckResetHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -13,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val db: MemoriDB
+    private val db: MemoriDB,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
     private val deckDao = db.deckDao()
     private val cardDao = db.cardDao()
@@ -22,6 +27,7 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            DeckResetHelper.resetDeckNewCountIfNeeded(context, deckDao)
             // 判断是否已存在 food 卡组，避免重复插入
             val exists = deckDao.getAll().any { it.name == "food" }
             if (!exists) {
@@ -71,13 +77,13 @@ class HomeViewModel @Inject constructor(
 
     private suspend fun doRefreshDecks() {
         val decks = deckDao.getAll()
-        val newCounts = cardDao.getNewCountByDeck().associateBy { it.deckId }
-        val reviewCounts = cardDao.getReviewCountByDeck().associateBy { it.deckId }
 
+        // 只需递归累加子deck的newCount和reviewCount
         val deckMap = decks.associateBy { it.deckId }.toMutableMap()
         deckMap.values.forEach { deck ->
-            deck.newCount = newCounts[deck.deckId]?.newCount ?: 0
-            deck.reviewCount = reviewCounts[deck.deckId]?.reviewCount ?: 0
+            // 这里直接用数据库中的字段，不再依赖cardDao统计
+            deck.newCount = deck.newCount ?: 0
+            deck.reviewCount = deck.reviewCount ?: 0
         }
 
         fun accumulate(deck: Deck): Pair<Int, Int> {

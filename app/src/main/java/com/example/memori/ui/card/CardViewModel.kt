@@ -52,12 +52,12 @@ class CardViewModel @Inject constructor(
             val allDeckIds = getAllSubDeckIds(deckId)
             // 2. 获取deck，读取新卡上限
             val deck = deckDao.getAll().find { it.deckId == deckId }
-            val newCardLimit = deck?.newCardLimit ?: 0
+            val newCount = deck?.newCount ?: 0
 
             // 3. 获取复习卡片
             val dueCards = cardDao.getDueCardsByDecks(allDeckIds, until)
             // 4. 获取新卡片
-            val newCards = cardDao.getNewCardsByDecks(allDeckIds, newCardLimit)
+            val newCards = cardDao.getNewCardsByDecks(allDeckIds, newCount)
 
             // 5. 合并队列
             val queue = mergeCards(dueCards, newCards)
@@ -75,7 +75,7 @@ class CardViewModel @Inject constructor(
      * @param card 当前卡片
      * @param rating 用户评分
      */
-    fun onCardRated(card: Card, rating: Rating) {
+    fun onCardRated(card: Card, rating: Rating, until: LocalDateTime) {
         viewModelScope.launch(Dispatchers.IO) {
             println("原始Card: $card")
             val fsrsCard = card.toFSRSCard()
@@ -103,7 +103,32 @@ class CardViewModel @Inject constructor(
             println("最终用于更新的Card: $updatedCard")
             cardDao.updateCard(updatedCard)
             println("数据库已更新")
-            loadCardQueue(card.deckId, LocalDateTime.now())
+
+            // 在新卡被学习时递归向上更新newCount
+            if (card.status == "New" && updatedCard.status != "New") {
+                cascadeDecreaseNewCount(card.deckId)
+            }
+
+            loadCardQueue(card.deckId, until)
         }
+    }
+
+    private suspend fun cascadeDecreaseNewCount(deckId: Long) {
+        var currentDeckId: Long? = deckId
+        val allDecks = deckDao.getAll()
+        while (currentDeckId != null) {
+            val deck = allDecks.find { it.deckId == currentDeckId }
+            if (deck != null && deck.newCount!! > 0) {
+                deck.newCount = deck.newCount!! - 1
+                deckDao.updateDeck(deck)
+                currentDeckId = deck.parentId
+            } else {
+                break
+            }
+        }
+    }
+
+    suspend fun getCardDue(cardId: Long): LocalDateTime? {
+        return cardDao.getCardById(cardId)?.due
     }
 }

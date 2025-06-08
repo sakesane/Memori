@@ -1,5 +1,6 @@
 package com.example.memori.ui.card
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -25,22 +26,46 @@ fun SwipeTipDialog(
     rating: String,
     due: LocalDateTime
 ) {
-    // 时间格式化
-    fun formatSchedule(days: Double): String {
-        return when {
-            days < 1.0 -> {
-                val totalMinutes = (days * 24 * 60).toInt()
-                val hours = totalMinutes / 60
-                val minutes = totalMinutes % 60
-                when {
-                    hours > 0 && minutes > 0 -> "${hours}小时${minutes}分钟"
-                    hours > 0 -> "${hours}小时"
-                    else -> "${minutes}分钟"
+    // 传入目标时间，自动与当前时间比较并格式化
+    @SuppressLint("DefaultLocale")
+    fun formatSchedule(target: LocalDateTime): String {
+        val now = LocalDateTime.now()
+        println("DEBUG: now = $now, target = $target")
+        if (target.isBefore(now)) {
+            println("DEBUG: target is before now, return <1分钟")
+            return "<1分钟"
+        } else {
+            val duration = java.time.Duration.between(now, target)
+            val dDays = duration.toDays()
+            val dHours = duration.toHours()
+            val dMins = duration.toMinutes()
+            println("DEBUG: duration = $duration, dDays = $dDays, dHours = $dHours, dMins = $dMins")
+            if (dDays > 1.0) {
+                if (dDays < 31) {
+                    println("DEBUG: return ${dDays.toInt()}天")
+                    return "${dDays.toInt()}天"
+                } else {
+                    val months = dDays / 30.0
+                    println("DEBUG: return %.1f月".format(months))
+                    return String.format("%.1f月", months)
+                }
+            } else {
+                if (dHours > 0) {
+                    val mins = dMins % 60
+                    println("DEBUG: hours > 0, mins = $mins")
+                    return if (mins > 0) {
+                        "${dHours}小时${mins}分钟"
+                    } else {
+                        "${dHours}小时"
+                    }
+                } else if (dMins > 0) {
+                    println("DEBUG: only minutes, return ${dMins}分钟")
+                    return "${dMins}分钟"
                 }
             }
-            days < 30 -> "${days.toInt()}天"
-            else -> String.format("%.1f月", days / 30.0)
         }
+        println("DEBUG: return Error")
+        return String.format("Error")
     }
 
     AnimatedVisibility(
@@ -66,9 +91,7 @@ fun SwipeTipDialog(
                     style = androidx.compose.material3.MaterialTheme.typography.titleMedium
                 )
                 Text(
-                    text = formatSchedule(
-                        java.time.Duration.between(due, LocalDateTime.now()).toMinutes().toDouble() / 60 / 24
-                    ),
+                    text = formatSchedule(due),
                     color = androidx.compose.material3.MaterialTheme.colorScheme.surface,
                     style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
                 )
