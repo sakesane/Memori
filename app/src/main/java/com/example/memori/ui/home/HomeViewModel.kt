@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.memori.database.MemoriDB
 import com.example.memori.database.entity.Deck
 import com.example.memori.database.entity.Card
-import com.example.memori.database.util.CustomNewDayTimeConverter
 import com.example.memori.database.util.DeckResetHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -21,7 +20,6 @@ class HomeViewModel @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ViewModel() {
     private val deckDao = db.deckDao()
-    private val cardDao = db.cardDao()
     private val _decks = MutableStateFlow<List<Deck>>(emptyList())
     val decks: StateFlow<List<Deck>> = _decks
 

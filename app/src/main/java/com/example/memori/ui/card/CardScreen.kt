@@ -1,7 +1,6 @@
 package com.example.memori.ui.card
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -24,6 +23,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.memori.algorithm.Rating
 import com.example.memori.database.util.CustomNewDayTimeConverter
+import com.example.memori.ui.card.topInfo.TopInfo
 import java.time.LocalDateTime
 
 /**
@@ -63,10 +63,15 @@ fun CardScreen(deckId: Long) {
     val density = LocalContext.current.resources.displayMetrics.density
     val maxOffsetPx = 32.dp.value * density
     val slideOutDistance = 1500f
+    
+    // 主题
+    val backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainer
+    val cardColor = androidx.compose.material3.MaterialTheme.colorScheme.surface
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        tonalElevation = 0.dp
+        tonalElevation = 0.dp,
+        color = backgroundColor
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             TopInfo()
@@ -94,13 +99,15 @@ fun CardScreen(deckId: Long) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         shape = androidx.compose.material3.MaterialTheme.shapes.medium,
-                        tonalElevation = 19.dp
+                        tonalElevation = 19.dp,
+                        color = cardColor
                     ) {
                         CardContent(card = nextCard, isFlipped = false)
                     }
                     // 当前卡片
                     Surface(
                         shape = androidx.compose.material3.MaterialTheme.shapes.medium,
+                        color = cardColor,
                         tonalElevation = 20.dp,
                         modifier = Modifier
                             .fillMaxSize()
@@ -233,7 +240,8 @@ fun CardScreen(deckId: Long) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),
                         shape = androidx.compose.material3.MaterialTheme.shapes.medium,
-                        tonalElevation = 20.dp
+                        tonalElevation = 20.dp,
+                        color = cardColor
                     ) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
