@@ -22,11 +22,12 @@ interface CardDao {
     @Query("SELECT * FROM cards")
     suspend fun getAllCards(): List<Card>
 
-    // 按传入的时间筛选到期卡片
+    // 按传入的时间筛选到期卡片（排除 new 卡片）
     @Query("""
         SELECT * FROM cards 
         WHERE deckId IN (:deckIds) 
         AND due < :until
+        AND status != 'New'
         ORDER BY due ASC
     """)
     suspend fun getDueCardsByDecks(
@@ -47,43 +48,24 @@ interface CardDao {
         limit: Int
     ): List<Card>
 
-    // 获取deck当天复习卡的count，筛选到期时间
     @Query("""
-        SELECT deckId, COUNT(*) as reviewCount 
-        FROM cards 
-        WHERE status IN ('Learning', 'Review', 'Relearning') 
+        SELECT * FROM cards 
+        WHERE cardId = :cardId 
+        LIMIT 1
+    """)
+    fun observeCardById(
+        cardId: Long
+    ): Flow<Card?>
+
+    @Query("""
+        SELECT COUNT(*) FROM cards 
+        WHERE deckId IN (:deckIds) 
+        AND status != 'New'
         AND due < :until
-        GROUP BY deckId
     """)
-    suspend fun getReviewCountByDeck(
+    suspend fun getDueReviewCountByDecks(
+        deckIds: List<Long>,
         until: LocalDateTime
-    ): List<DeckReviewCount>
-    // 注：获取deck所有New的count是通过查询new卡片队列大小实现的
+    ): Int
 
-    // 获取deck所有New的count，不筛选当天到期
-    @Query("SELECT deckId, COUNT(*) as newCount FROM cards WHERE status = 'New' GROUP BY deckId")
-    suspend fun getAllNewCountByDeck(): List<DeckNewCount>
-
-    // 获取deck所有复习卡的count，不筛选当天到期
-    // 虽然名字叫review，实际上是除了New之外的所有状态
-    @Query("""
-        SELECT deckId, COUNT(*) as reviewCount 
-        FROM cards 
-        WHERE status IN ('Learning', 'Review', 'Relearning') 
-        GROUP BY deckId
-    """)
-    suspend fun getAllReviewCountByDeck(): List<DeckReviewCount>
-
-    @Query("SELECT * FROM card WHERE cardId = :cardId LIMIT 1")
-    fun observeCardById(cardId: Long): Flow<Card?>
-
-    data class DeckNewCount(
-        val deckId: Long,
-        val newCount: Int? = 0
-    )
-
-    data class DeckReviewCount(
-        val deckId: Long,
-        val reviewCount: Int? = 0
-    )
 }

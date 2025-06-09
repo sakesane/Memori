@@ -15,7 +15,6 @@ import com.example.memori.database.entity.toFSRSCard
 import com.example.memori.database.entity.toCard
 import kotlinx.coroutines.Dispatchers
 import java.time.LocalDateTime
-import androidx.lifecycle.liveData
 
 @HiltViewModel
 class CardViewModel @Inject constructor(
@@ -51,17 +50,24 @@ class CardViewModel @Inject constructor(
         viewModelScope.launch {
             // 1. 获取所有相关deckId（包括子deck）
             val allDeckIds = getAllSubDeckIds(deckId)
+            println("获取到的所有相关deckId: $allDeckIds")
+
             // 2. 获取deck，读取新卡上限
             val deck = deckDao.getAll().find { it.deckId == deckId }
             val newCount = deck?.newCount ?: 0
+            println("当前deck: $deck, newCount: $newCount")
 
             // 3. 获取复习卡片
             val dueCards = cardDao.getDueCardsByDecks(allDeckIds, until)
+            println("获取到的复习卡片数量: ${dueCards.size}")
+
             // 4. 获取新卡片
             val newCards = cardDao.getNewCardsByDecks(allDeckIds, newCount)
+            println("获取到的新卡片数量: ${newCards.size}")
 
             // 5. 合并队列
             val queue = mergeCards(dueCards, newCards)
+            println("最终合并队列数量: ${queue.size}")
             _cardQueue.postValue(queue)
         }
     }
@@ -105,10 +111,13 @@ class CardViewModel @Inject constructor(
             cardDao.updateCard(updatedCard)
             println("数据库已更新")
 
-            // 在新卡被学习时递归向上更新newCount
+            // 在新卡被学习时递归向上更新 newCount
             if (card.status == "New" && updatedCard.status != "New") {
                 cascadeDecreaseNewCount(card.deckId)
             }
+
+            // 每学习一张卡片都递归更新reviewCount
+            cascadeComputeReviewCount(card.deckId, until)
 
             loadCardQueue(card.deckId, until)
         }
@@ -129,10 +138,32 @@ class CardViewModel @Inject constructor(
         }
     }
 
-    // 获取某张卡片的 due 字段，自动响应数据库变化
-    fun getCardDueLive(cardId: Long): LiveData<LocalDateTime> = liveData {
-        cardDao.observeCardById(cardId).collect { card ->
-            emit(card?.due ?: LocalDateTime.now())
+    private suspend fun cascadeComputeReviewCount(deckId: Long, until: LocalDateTime) {
+        var currentDeckId: Long? = deckId
+        val allDecks = deckDao.getAll()
+        println("开始递归更新reviewCount，起始deckId: $deckId")
+        while (currentDeckId != null) {
+            println("处理deckId: $currentDeckId")
+            val subDeckIds = getAllSubDeckIds(currentDeckId)
+            println("  子deckId集合: $subDeckIds")
+            val reviewCount = cardDao.getDueReviewCountByDecks(subDeckIds, until)
+            println("  统计得到的reviewCount: $reviewCount")
+            val deck = allDecks.find { it.deckId == currentDeckId }
+            if (deck != null) {
+                println("  更新前deck.reviewCount: ${deck.reviewCount}")
+                deck.reviewCount = reviewCount
+                deckDao.updateDeck(deck)
+                println("  已更新deckId $currentDeckId 的reviewCount为: ${deck.reviewCount}")
+                currentDeckId = deck.parentId
+            } else {
+                println("  未找到deckId: $currentDeckId，递归结束")
+                break
+            }
         }
+        println("递归更新reviewCount结束")
+    }
+
+    suspend fun getCardDue(cardId: Long): LocalDateTime? {
+        return cardDao.getCardById(cardId)?.due
     }
 }

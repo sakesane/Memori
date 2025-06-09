@@ -12,7 +12,7 @@ object GlobalSettings {
     private val NEW_DAY_BEGIN = intPreferencesKey("refresh_hour")
 
     fun getRefreshTime(context: Context): Flow<Int> =
-        context.settingsDataStore.data.map { it[NEW_DAY_BEGIN] ?: 0 }
+        context.settingsDataStore.data.map { it[NEW_DAY_BEGIN] ?: 2 }
 
     suspend fun setRefreshTime(context: Context, time: Int) {
         context.settingsDataStore.edit {

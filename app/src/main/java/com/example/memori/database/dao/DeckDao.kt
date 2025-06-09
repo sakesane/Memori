@@ -23,8 +23,5 @@ interface DeckDao {
     suspend fun updateDeck(deck: Deck)
 
     @Query("SELECT * FROM decks")
-    fun observeAll(): Flow<List<Deck>>
-
-    @Query("SELECT * FROM decks")
-    fun observeAllLive(): LiveData<List<Deck>>
+    fun getAllFlow(): Flow<List<Deck>>
 }

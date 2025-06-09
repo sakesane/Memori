@@ -20,6 +20,8 @@ import com.example.memori.navigation.Routes
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.example.memori.database.util.CustomNewDayTimeConverter
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun HomeContent(
@@ -44,11 +46,19 @@ fun HomeContent(
     }
 
     // 直接响应式获取 decks
-    val decks by viewModel.decks.collectAsState() // 如果 decks 是 LiveData 用 observeAsState()
+    val decks by viewModel.decks.collectAsState()
 
     // 计算所有叶子节点的单词数
     val leafDecks = decks.filter { deck -> decks.none { it.parentId == deck.deckId } }
     val wordCount = leafDecks.sumOf { (it.newCount ?: 0) + (it.reviewCount ?: 0) }
+
+    // 新增：异步获取刷新时间
+    var refreshDateTime by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) {
+        val dateTime = CustomNewDayTimeConverter.getTodayRefreshDateTime(context)
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+        refreshDateTime = dateTime.format(formatter)
+    }
 
     Column(
         modifier = Modifier
@@ -75,6 +85,17 @@ fun HomeContent(
                 }
             }
         )
+        // 新增：刷新时间提示
+        if (refreshDateTime != null) {
+            Text(
+                text = "新的一天将在 $refreshDateTime 开始",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+            )
+        }
     }
 }
 

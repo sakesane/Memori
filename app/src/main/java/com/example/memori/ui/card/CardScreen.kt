@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.memori.algorithm.Rating
@@ -42,7 +43,6 @@ fun CardScreen(deckId: Long) {
     val cards by vm.cardQueue.observeAsState(emptyList())
     var until = LocalDateTime.now()
 
-    // 首次加载卡片队列
     LaunchedEffect(deckId) {
         until = CustomNewDayTimeConverter.getTodayRefreshDateTime(context)
         vm.loadCardQueue(deckId, until)
@@ -64,10 +64,6 @@ fun CardScreen(deckId: Long) {
     val maxOffsetPx = 32.dp.value * density
     val slideOutDistance = 1500f
 
-    // 新卡片渐变动画相关变量
-    var showNewCard by remember { mutableStateOf(false) }
-    val newCardAlpha = remember { Animatable(0f) }
-
     Surface(
         modifier = Modifier.fillMaxSize(),
         tonalElevation = 0.dp
@@ -77,9 +73,11 @@ fun CardScreen(deckId: Long) {
 
             // 队列非空时
             if (cards.isNotEmpty()){
-                val currentCard = cards[cardIndex % cards.size]
+                val currentCard = { 
+                    if (cards.isEmpty()) null
+                    else cards[(cardIndex) % cards.size]
+                }
                 val nextCard = cards[(cardIndex + 1) % cards.size]
-                var cardDue by remember { mutableStateOf(vm.getCardDue(currentCard.cardId) ?: LocalDateTime.now()) }
 
                 Box(
                     modifier = Modifier
@@ -160,15 +158,10 @@ fun CardScreen(deckId: Long) {
                                             tipTextRating = rating.toString()
                                             // 调用评分反馈
                                             if (rating != null) {
-                                                vm.onCardRated(currentCard, rating, until)
                                                 scope.launch {
-                                                    // 等待评分和数据库更新完成后再获取最新 due
-                                                    kotlinx.coroutines.delay(100) // 可适当调整等待时间，确保数据库已更新
-                                                    val latestDue = vm.getCardDue(currentCard.cardId)
-                                                    cardDue = latestDue ?: LocalDateTime.now()
+                                                    currentCard()?.let { vm.onCardRated(it, rating, until) }
                                                 }
                                             }
-                                            
                                             if (direction != null) {
                                                 showTip = true
                                                 scope.launch {
@@ -198,7 +191,9 @@ fun CardScreen(deckId: Long) {
                                                     offsetY.snapTo(0f)
                                                     rotation.snapTo(0f)
                                                     alpha.snapTo(1f)
-                                                    cardIndex = (cardIndex + 1) % cards.size
+                                                    if (cards.isNotEmpty()) {
+                                                        cardIndex = (cardIndex + 1) % cards.size
+                                                    }
                                                 }
                                             } else {
                                                 // 未达到阈值，回弹动画
@@ -218,9 +213,9 @@ fun CardScreen(deckId: Long) {
                                 onClick = { isFlipped = true }
                             )
                     ) {
-                        CardContent(card = currentCard, isFlipped = isFlipped)
+                        currentCard()?.let { CardContent(card = it, isFlipped = isFlipped) }
                     }
-                    SwipeTipDialog(visible = showTip, rating = tipTextRating, due = cardDue)
+                    SwipeTipDialog(visible = showTip, rating = tipTextRating)
                 }
             } else {
                 // card 队列为空

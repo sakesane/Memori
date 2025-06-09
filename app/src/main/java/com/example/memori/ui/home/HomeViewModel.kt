@@ -27,7 +27,6 @@ class HomeViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            DeckResetHelper.resetDeckNewCountIfNeeded(context, deckDao)
             // 判断是否已存在 food 卡组，避免重复插入
             val exists = deckDao.getAll().any { it.name == "food" }
             if (!exists) {
@@ -64,43 +63,12 @@ class HomeViewModel @Inject constructor(
                 )
                 exampleCards.forEach { db.cardDao().insertCard(it) }
             }
-
-            refreshDecks()
+            DeckResetHelper.resetDeckNewCountIfNeeded(context, deckDao)
         }
-    }
-
-    fun refreshDecks() {
         viewModelScope.launch {
-            doRefreshDecks()
-        }
-    }
-
-    private suspend fun doRefreshDecks() {
-        val decks = deckDao.getAll()
-
-        // 只需递归累加子deck的newCount和reviewCount
-        val deckMap = decks.associateBy { it.deckId }.toMutableMap()
-        deckMap.values.forEach { deck ->
-            // 这里直接用数据库中的字段，不再依赖cardDao统计
-            deck.newCount = deck.newCount ?: 0
-            deck.reviewCount = deck.reviewCount ?: 0
-        }
-
-        fun accumulate(deck: Deck): Pair<Int, Int> {
-            val children = decks.filter { it.parentId == deck.deckId }
-            var totalNew = deck.newCount ?: 0
-            var totalReview = deck.reviewCount ?: 0
-            for (child in children) {
-                val (childNew, childReview) = accumulate(child)
-                totalNew += childNew
-                totalReview += childReview
+            deckDao.getAllFlow().collect { deckList ->
+                _decks.value = deckList
             }
-            deck.newCount = totalNew
-            deck.reviewCount = totalReview
-            return totalNew to totalReview
         }
-        deckMap.values.filter { it.parentId == null }.forEach { accumulate(it) }
-
-        _decks.value = deckMap.values.toList()
     }
 }

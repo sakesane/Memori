@@ -23,10 +23,9 @@ import java.time.LocalDateTime
 @Composable
 fun SwipeTipDialog(
     visible: Boolean,
-    rating: String,
-    due: LocalDateTime
+    rating: String
 ) {
-    // 传入目标时间，自动与当前时间比较并格式化
+    /* // 传入目标时间，自动与当前时间比较并格式化
     @SuppressLint("DefaultLocale")
     fun formatSchedule(target: LocalDateTime): String {
         val now = LocalDateTime.now()
@@ -65,8 +64,8 @@ fun SwipeTipDialog(
             }
         }
         println("DEBUG: return Error")
-        return String.format("Error")
-    }
+        return String.format("Error") 
+    } */
 
     AnimatedVisibility(
         visible = visible,
@@ -90,11 +89,11 @@ fun SwipeTipDialog(
                     color = androidx.compose.material3.MaterialTheme.colorScheme.surface,
                     style = androidx.compose.material3.MaterialTheme.typography.titleMedium
                 )
-                Text(
+                /* Text(
                     text = formatSchedule(due),
                     color = androidx.compose.material3.MaterialTheme.colorScheme.surface,
                     style = androidx.compose.material3.MaterialTheme.typography.bodyMedium
-                )
+                ) */
             }
         }
     }

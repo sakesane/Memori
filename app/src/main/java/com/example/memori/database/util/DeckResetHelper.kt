@@ -11,14 +11,19 @@ object DeckResetHelper {
     private val LAST_RESET_DATE = stringPreferencesKey("last_deck_newcount_reset_date")
 
     suspend fun resetDeckNewCountIfNeeded(context: Context, deckDao: DeckDao) {
-        val refreshDateTime = CustomNewDayTimeConverter.getTodayRefreshDateTime(context)
-        val todayFlag = refreshDateTime.toLocalDate().toString() // 例如 "2024-06-09"
+        /* 
+            重置判断条件：lastReset != todayFlag
+            lastReset 从 DataStore 中读取
+            todayFlag 由 CustomNewDayTimeConverter 获取
+         */
+        val refreshDateTime = CustomNewDayTimeConverter.getTodayRefreshDateTime(context).minusDays(1)
+        val todayFlag = refreshDateTime.toLocalDate().toString()
 
         val prefs = context.settingsDataStore.data.first()
         val lastReset = prefs[LAST_RESET_DATE]
 
         if (lastReset != todayFlag) {
-            // 需要重置
+            // 重置内容逻辑
             val decks = deckDao.getAll()
             decks.forEach { deck ->
                 deck.newCount = deck.newCardLimit
@@ -27,5 +32,6 @@ object DeckResetHelper {
             // 更新flag
             context.settingsDataStore.edit { it[LAST_RESET_DATE] = todayFlag }
         }
+        println("调用了 DeckResetHelper. Last reset date: $lastReset, Today: $todayFlag")
     }
 }

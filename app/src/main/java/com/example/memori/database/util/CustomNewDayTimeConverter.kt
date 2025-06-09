@@ -14,7 +14,7 @@ object CustomNewDayTimeConverter {
     suspend fun getTodayRefreshDateTime(context: Context): LocalDateTime {
         val time = GlobalSettings.getRefreshTime(context).first()
         val now = LocalDateTime.now()
-        val baseDate = if (time < 12) now.toLocalDate().plusDays(1) else now.toLocalDate()
+        val baseDate = now.toLocalDate().plusDays(1)
         return LocalDateTime.of(baseDate, LocalTime.of(time, 0))
     }
 }
