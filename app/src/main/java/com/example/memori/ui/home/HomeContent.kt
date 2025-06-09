@@ -26,21 +26,6 @@ fun HomeContent(
     navController: NavController,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
-    // 监听导航返回
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                // 重新加载数据
-                viewModel.refreshDecks()
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("memori_prefs", Context.MODE_PRIVATE) }
     var expandedDecks by remember {
@@ -58,7 +43,10 @@ fun HomeContent(
         prefs.edit().putString("expanded_decks", expandedDecks.joinToString(",")).apply()
     }
 
-    val decks by viewModel.decks.collectAsState()
+    // 直接响应式获取 decks
+    val decks by viewModel.decks.collectAsState() // 如果 decks 是 LiveData 用 observeAsState()
+
+    // 计算所有叶子节点的单词数
     val leafDecks = decks.filter { deck -> decks.none { it.parentId == deck.deckId } }
     val wordCount = leafDecks.sumOf { (it.newCount ?: 0) + (it.reviewCount ?: 0) }
 
@@ -82,7 +70,7 @@ fun HomeContent(
             },
             modifier = Modifier.weight(1f),
             onDeckClick = { deckId ->
-                navController.navigate(Routes.CARD_WITH_ARG.replace("{deckId}", deckId.toString())){
+                navController.navigate(Routes.CARD_WITH_ARG.replace("{deckId}", deckId.toString())) {
                     popUpTo(Routes.HOME)
                 }
             }

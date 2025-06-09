@@ -15,6 +15,7 @@ import com.example.memori.database.entity.toFSRSCard
 import com.example.memori.database.entity.toCard
 import kotlinx.coroutines.Dispatchers
 import java.time.LocalDateTime
+import androidx.lifecycle.liveData
 
 @HiltViewModel
 class CardViewModel @Inject constructor(
@@ -128,7 +129,10 @@ class CardViewModel @Inject constructor(
         }
     }
 
-    suspend fun getCardDue(cardId: Long): LocalDateTime? {
-        return cardDao.getCardById(cardId)?.due
+    // 获取某张卡片的 due 字段，自动响应数据库变化
+    fun getCardDueLive(cardId: Long): LiveData<LocalDateTime> = liveData {
+        cardDao.observeCardById(cardId).collect { card ->
+            emit(card?.due ?: LocalDateTime.now())
+        }
     }
 }

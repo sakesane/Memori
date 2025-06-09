@@ -3,6 +3,7 @@ package com.example.memori.database.dao
 import androidx.room.*
 import com.example.memori.database.entity.Card
 import java.time.LocalDateTime
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CardDao {
@@ -72,6 +73,9 @@ interface CardDao {
         GROUP BY deckId
     """)
     suspend fun getAllReviewCountByDeck(): List<DeckReviewCount>
+
+    @Query("SELECT * FROM card WHERE cardId = :cardId LIMIT 1")
+    fun observeCardById(cardId: Long): Flow<Card?>
 
     data class DeckNewCount(
         val deckId: Long,

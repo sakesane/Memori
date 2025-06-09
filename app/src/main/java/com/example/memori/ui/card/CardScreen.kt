@@ -41,8 +41,8 @@ fun CardScreen(deckId: Long) {
     // 获取卡片队列
     val cards by vm.cardQueue.observeAsState(emptyList())
     var until = LocalDateTime.now()
-    
-    // 首次加载卡片队列，传入本机当前时间
+
+    // 首次加载卡片队列
     LaunchedEffect(deckId) {
         until = CustomNewDayTimeConverter.getTodayRefreshDateTime(context)
         vm.loadCardQueue(deckId, until)
@@ -79,7 +79,7 @@ fun CardScreen(deckId: Long) {
             if (cards.isNotEmpty()){
                 val currentCard = cards[cardIndex % cards.size]
                 val nextCard = cards[(cardIndex + 1) % cards.size]
-                var cardDue = LocalDateTime.now()
+                var cardDue by remember { mutableStateOf(vm.getCardDue(currentCard.cardId) ?: LocalDateTime.now()) }
 
                 Box(
                     modifier = Modifier
@@ -221,6 +221,32 @@ fun CardScreen(deckId: Long) {
                         CardContent(card = currentCard, isFlipped = isFlipped)
                     }
                     SwipeTipDialog(visible = showTip, rating = tipTextRating, due = cardDue)
+                }
+            } else {
+                // card 队列为空
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(
+                            top = 16.dp,
+                            start = 24.dp,
+                            end = 24.dp,
+                            bottom = 24.dp
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Surface(
+                        modifier = Modifier.fillMaxSize(),
+                        shape = androidx.compose.material3.MaterialTheme.shapes.medium,
+                        tonalElevation = 20.dp
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text("今日本卡组学习任务已完成")
+                        }
+                    }
                 }
             }
         }

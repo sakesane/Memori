@@ -1,7 +1,9 @@
 package com.example.memori.database.dao
 
+import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.memori.database.entity.Deck
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DeckDao {
@@ -19,4 +21,10 @@ interface DeckDao {
 
     @Update
     suspend fun updateDeck(deck: Deck)
+
+    @Query("SELECT * FROM decks")
+    fun observeAll(): Flow<List<Deck>>
+
+    @Query("SELECT * FROM decks")
+    fun observeAllLive(): LiveData<List<Deck>>
 }
