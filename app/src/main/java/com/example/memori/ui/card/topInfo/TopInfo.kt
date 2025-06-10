@@ -14,22 +14,43 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import com.example.memori.database.entity.Deck
 
 @Composable
-fun TopInfo() {
+fun TopInfo(deckId: Long, viewModel: TopInfoViewModel = hiltViewModel()) {
+    val deck by viewModel.deckFlow(deckId).collectAsState(initial = null)
+    var allNewCount by remember { mutableStateOf(0) }
+
+    LaunchedEffect(deckId) {
+        allNewCount = viewModel.getAllNewCount(deckId)
+    }
+
+    val expectedDays = getExpectedStudyDays(deck, allNewCount)
+
     val statusBarHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     // 主题
-    val outsideColor =  androidx.compose.material3.MaterialTheme.colorScheme.surface
-    val numberColor = androidx.compose.material3.MaterialTheme.colorScheme.primary
-    val barColor = androidx.compose.material3.MaterialTheme.colorScheme.primary
+    val outsideColor =  MaterialTheme.colorScheme.surface
+    val dayColor = MaterialTheme.colorScheme.outline
+    val barColor = MaterialTheme.colorScheme.outlineVariant
+    val rTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val newColor = MaterialTheme.colorScheme.error
+    val relearnColor = MaterialTheme.colorScheme.primary
+    val sumColor = MaterialTheme.colorScheme.tertiary
 
     Surface(
         modifier = Modifier
@@ -39,9 +60,9 @@ fun TopInfo() {
                 end = 24.dp
             )
             .fillMaxWidth()
-            .height(140.dp),
+            .height(120.dp),
         color = outsideColor,
-        shape = androidx.compose.material3.MaterialTheme.shapes.medium,
+        shape = MaterialTheme.shapes.medium,
         tonalElevation = 20.dp
     ) {
         Box(
@@ -57,23 +78,32 @@ fun TopInfo() {
                 // 左侧内容
                 Box(
                     modifier = Modifier
-                        .weight(2f)
+                        .weight(2.1f)
                         .fillMaxHeight(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "左侧内容",
-                        color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        val newCount = deck?.newCount ?: 0
+                        val reviewCount = deck?.reviewCount ?: 0
+                        val sumCount = newCount + reviewCount
+                        statusCountBox("新词", newCount, newColor)
+                        statusCountBox("复习", reviewCount, relearnColor)
+                        statusCountBox("共计", sumCount, sumColor)
+                    }
                 }
+                Spacer(modifier = Modifier.width(4.dp))
                 Surface(
                     modifier = Modifier
-                        .width(8.dp)
+                        .width(4.dp)
                         .fillMaxHeight(),
                     color = barColor,
-                    shape = androidx.compose.material3.MaterialTheme.shapes.medium
+                    shape = MaterialTheme.shapes.medium
                 ){}
-                Spacer(modifier = Modifier.width(4.dp))
+                Spacer(modifier = Modifier.width(8.dp))
                 // 右侧内容
                 Box(
                     modifier = Modifier
@@ -84,32 +114,35 @@ fun TopInfo() {
                 ) {
                     Column(
                         modifier = Modifier
-                            .padding(3.dp),
+                            .fillMaxSize(),
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.Start
                     ) {
                         Text(
                             text = "预计",
-                            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface
+                            color = rTextColor
                         )
-                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.Bottom
+                        ) {
                             Text(
-                                text = "20",
-                                color = numberColor,
+                                text = expectedDays.toString(),
+                                color = dayColor,
                                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                fontSize = 40.sp
+                                fontSize = 32.sp
                             )
                             Text(
                                 text = "d",
-                                color = numberColor,
+                                color = dayColor,
                                 fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                                fontSize = 26.sp, // 更小的字号
+                                fontSize = 20.sp,
                                 modifier = Modifier.padding(start = 2.dp, bottom = 4.dp)
                             )
                         }
                         Text(
                             text = "学完新词",
-                            color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface
+                            color = rTextColor
                         )
                     }
                 }
@@ -118,9 +151,28 @@ fun TopInfo() {
     }
 }
 
+private fun getExpectedStudyDays(deck: Deck?, allNewCount: Int): Int {
+    if (deck?.newCardLimit == null || deck.newCardLimit == 0) return 0
+    val newCardLimit = deck.newCardLimit ?: 1
+    return (allNewCount + newCardLimit - 1) / newCardLimit // 向上取整
+}
 
-@Preview(showBackground = true)
 @Composable
-fun TopInfoPreview() {
-    TopInfo()
+fun statusCountBox(status: String, count: Int, numberColor: androidx.compose.ui.graphics.Color) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier.padding(horizontal = 8.dp)
+    ) {
+        Text(
+            text = status,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = count.toString(),
+            color = numberColor,
+            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+            fontSize = 32.sp
+        )
+    }
 }

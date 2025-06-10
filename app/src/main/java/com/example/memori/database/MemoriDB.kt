@@ -11,9 +11,8 @@ import com.example.memori.database.util.Converters
     entities = [
         Card::class,
         Deck::class,
-        Revlog::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = false
 )
 
@@ -21,5 +20,4 @@ import com.example.memori.database.util.Converters
 abstract class MemoriDB : RoomDatabase() {
     abstract fun cardDao(): CardDao
     abstract fun deckDao(): DeckDao
-    abstract fun revlogDao(): RevlogDao
 }

@@ -42,15 +42,3 @@ fun FSRSCard.toCard(
     )
 }
 
-// ReviewLog to RevLog
-fun ReviewLog.toRevLog(cardId: Long): Revlog {
-    return Revlog(
-        cardId = cardId,
-        rating = this.rating.name,
-        elapsedDays = this.elapsedDays,
-        scheduledDays = this.scheduledDays,
-        review = this.review,
-        status = this.status.value
-    )
-}
-

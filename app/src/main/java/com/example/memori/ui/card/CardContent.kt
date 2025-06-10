@@ -85,15 +85,20 @@ fun CardContent(card: Card, isFlipped: Boolean) {
                     fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
                 )
             }
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             if (isFlipped) {
-                card.back?.let { Text(text = it) }
+                card.back?.let {
+                    Text(
+                        text = it,
+                        fontSize = 32.sp,
+                        color = answerColor
+                    )
+                }
                 card.example?.let {
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = it,
-                        fontSize = 36.sp,
-                        color = answerColor
+                        fontSize = 24.sp
                     )
                 }
             }

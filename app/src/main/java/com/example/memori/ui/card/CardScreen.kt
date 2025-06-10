@@ -89,7 +89,7 @@ fun CardScreen(deckId: Long) {
         color = backgroundColor
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            TopInfo()
+            TopInfo(deckId = deckId)
 
             // 队列非空时
             if (cards.isNotEmpty()){

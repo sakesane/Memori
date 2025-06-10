@@ -24,4 +24,7 @@ interface DeckDao {
 
     @Query("SELECT * FROM decks")
     fun getAllFlow(): Flow<List<Deck>>
+
+    @Query("SELECT * FROM decks WHERE deckId = :deckId LIMIT 1")
+    fun getDeckFlow(deckId: Long): Flow<Deck?>
 }

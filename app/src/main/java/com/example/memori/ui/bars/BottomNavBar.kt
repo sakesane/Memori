@@ -22,7 +22,7 @@ fun BottomNavBar(
 ) {
     val routes = listOf("home", "smart", "stats")
     val labels = listOf("主页", "AI", "统计")
-    val barColor = MaterialTheme.colorScheme.surface
+    val barColor = MaterialTheme.colorScheme.secondaryContainer
     val iconColor = MaterialTheme.colorScheme.onSurface
     
     NavigationBar(

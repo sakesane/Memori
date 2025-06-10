@@ -59,7 +59,7 @@ fun HomeContent(
     var refreshDateTime by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(Unit) {
         val dateTime = CustomNewDayTimeConverter.getTodayRefreshDateTime(context)
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+        val formatter = DateTimeFormatter.ofPattern("yyyy / MM / dd  HH : mm")
         refreshDateTime = dateTime.format(formatter)
     }
 
@@ -99,8 +99,7 @@ fun HomeContent(
                 text = "新的一天将在 $refreshDateTime 开始",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 12.dp)
-                    .align(Alignment.CenterHorizontally),
+                    .padding(vertical = 12.dp),
                 fontSize = 14.sp,
                 color = refreshTextColor
             )
@@ -111,7 +110,7 @@ fun HomeContent(
 @Composable
 fun LearnProgressText(wordCount: Int) {
     Text(
-        text = "还有 $wordCount 个词待学习",
+        text = "还有 $wordCount 张卡片待学习",
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 24.dp, bottom = 16.dp, start = 16.dp, end = 16.dp),
@@ -156,6 +155,7 @@ fun DeckItem(
     indent: Int = 0
 ) {
     val hasChildren = decks.any { it.parentId == deck.deckId }
+    val deckFontSize = 16.sp
     Column {
         Row(
             modifier = Modifier
@@ -180,7 +180,7 @@ fun DeckItem(
             Text(
                 text = deck.name,
                 modifier = Modifier.weight(1f),
-                fontSize = 16.sp
+                fontSize = deckFontSize
             )
             Row(
                 modifier = Modifier
@@ -191,14 +191,14 @@ fun DeckItem(
             ) {
                 Text(
                     text = "新 ${deck.newCount}",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.wordNewGreen
+                    fontSize = deckFontSize,
+                    color = MaterialTheme.colorScheme.error
                 )
                 Text(
                     text = "复 ${deck.reviewCount}",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.reviewPurple,
-                    modifier = Modifier.padding(start = 8.dp)
+                    fontSize = deckFontSize,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(start = 12.dp)
                 )
             }
         }

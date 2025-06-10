@@ -68,4 +68,11 @@ interface CardDao {
         until: LocalDateTime
     ): Int
 
+    @Query("""
+        SELECT COUNT(*) FROM cards
+        WHERE deckId IN (:deckIds)
+        AND status = 'New'
+    """)
+    suspend fun getNewCardCountByDeckIds(deckIds: List<Long>): Int
+
 }
