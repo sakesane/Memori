@@ -4,6 +4,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,10 +21,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.memori.algorithm.Rating
 import com.example.memori.database.util.CustomNewDayTimeConverter
 import com.example.memori.ui.card.topInfo.TopInfo
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.time.LocalDateTime
 
 /**
@@ -43,9 +46,24 @@ fun CardScreen(deckId: Long) {
     val cards by vm.cardQueue.observeAsState(emptyList())
     var until = LocalDateTime.now()
 
+    // 主题
+    val backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainer
+    val cardColor = androidx.compose.material3.MaterialTheme.colorScheme.surface
+    val darkTheme = isSystemInDarkTheme()
+    val systemUiController = rememberSystemUiController()
+    
     LaunchedEffect(deckId) {
         until = CustomNewDayTimeConverter.getTodayRefreshDateTime(context)
         vm.loadCardQueue(deckId, until)
+        systemUiController.setStatusBarColor(
+            color = Color.Transparent,
+            darkIcons = !darkTheme
+        )
+        systemUiController.setNavigationBarColor(
+            color = Color.Transparent,
+            navigationBarContrastEnforced = false,
+            darkIcons = !darkTheme
+        )
     }
 
     // 动画状态
@@ -64,9 +82,6 @@ fun CardScreen(deckId: Long) {
     val maxOffsetPx = 32.dp.value * density
     val slideOutDistance = 1500f
     
-    // 主题
-    val backgroundColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainer
-    val cardColor = androidx.compose.material3.MaterialTheme.colorScheme.surface
 
     Surface(
         modifier = Modifier.fillMaxSize(),

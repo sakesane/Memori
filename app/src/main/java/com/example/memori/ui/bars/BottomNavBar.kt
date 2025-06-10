@@ -11,7 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.memori.R
 
 @Composable
 fun BottomNavBar(
@@ -20,8 +22,12 @@ fun BottomNavBar(
 ) {
     val routes = listOf("home", "smart", "stats")
     val labels = listOf("主页", "AI", "统计")
+    val barColor = MaterialTheme.colorScheme.surface
+    val iconColor = MaterialTheme.colorScheme.onSurface
+    
     NavigationBar(
-        modifier = Modifier.height(88.dp) // 调整底栏高度
+        modifier = Modifier.height(96.dp),
+        containerColor = barColor
     ) {
         routes.forEachIndexed { index, route ->
             NavigationBarItem(
@@ -37,11 +43,20 @@ fun BottomNavBar(
                 },
                 icon = {
                     when (index) {
-                        0 -> Icon(Icons.Default.Home, contentDescription = "主页面")
-                        1 -> Icon(Icons.Default.Star, contentDescription = "智能")
+                        0 -> Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = "主页面",
+                            tint = iconColor
+                        )
+                        1 -> Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = "智能",
+                            tint = iconColor
+                        )
                         2 -> Icon(
-                            painter = painterResource(id = com.example.memori.R.drawable.bar_chart_24),
-                            contentDescription = "统计"
+                            painter = painterResource(id = R.drawable.bar_chart_24),
+                            contentDescription = "统计",
+                            tint = iconColor
                         )
                         else -> Spacer(modifier = Modifier.size(24.dp))
                     }
@@ -49,6 +64,7 @@ fun BottomNavBar(
                 label = {
                     Text(
                         text = labels[index],
+                        fontSize = 12.sp,
                         style = MaterialTheme.typography.labelSmall
                     )
                 },

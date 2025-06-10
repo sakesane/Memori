@@ -28,6 +28,9 @@ fun HomeContent(
     navController: NavController,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
+    // 主题
+    val refreshTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+
     val context = LocalContext.current
     val prefs = remember { context.getSharedPreferences("memori_prefs", Context.MODE_PRIVATE) }
     var expandedDecks by remember {
@@ -65,13 +68,17 @@ fun HomeContent(
             .fillMaxSize()
             .padding(horizontal = 16.dp)
     ) {
+        Spacer(modifier = Modifier.width(8.dp))
+
         LearnProgressText(wordCount)
+
         HorizontalDivider(
             modifier = Modifier
                 .padding(horizontal = 18.dp, vertical = 8.dp),
             thickness = 1.dp,
             color = MaterialTheme.colorScheme.outline
         )
+
         DeckList(
             decks = decks,
             expandedDecks = expandedDecks,
@@ -85,15 +92,17 @@ fun HomeContent(
                 }
             }
         )
+        
         // 新增：刷新时间提示
         if (refreshDateTime != null) {
             Text(
                 text = "新的一天将在 $refreshDateTime 开始",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 12.dp),
+                    .padding(vertical = 12.dp)
+                    .align(Alignment.CenterHorizontally),
                 fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                color = refreshTextColor
             )
         }
     }

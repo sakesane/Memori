@@ -13,14 +13,39 @@ import com.example.memori.navigation.AppNavGraph
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.example.memori.navigation.Routes
 import com.example.memori.ui.bars.BottomNavBar
 import com.example.memori.ui.bars.TopNavBar
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @SuppressLint("UnusedCrossfadeTargetStateParameter")
 @Composable
 fun AppScaffold(navController: NavHostController) {
+
+    // 主题
+    val bgColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainer
+    val contentColor = androidx.compose.material3.MaterialTheme.colorScheme.surface
+    val darkTheme = isSystemInDarkTheme()
+    val systemUiController = rememberSystemUiController()
+    
+    LaunchedEffect(darkTheme) {
+        systemUiController.setStatusBarColor(
+            color = Color.Transparent,
+            darkIcons = !darkTheme
+        )
+        systemUiController.setNavigationBarColor(
+            color = Color.Transparent,
+            navigationBarContrastEnforced = false,
+            darkIcons = !darkTheme
+        )
+    }
+
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
     val selectedIndex = when (currentRoute) {
@@ -43,14 +68,22 @@ fun AppScaffold(navController: NavHostController) {
             Box(
                 modifier = Modifier
                     .padding(innerPadding)
-                    .background(androidx.compose.material3.MaterialTheme.colorScheme.background)
+                    .background(bgColor)
+            ) {
+                Surface (
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    shape = androidx.compose.material3.MaterialTheme.shapes.medium,
+                    color = contentColor
                 ) {
-                Crossfade(
+                    Crossfade(
                         targetState = currentRoute,
                         animationSpec = tween(durationMillis = 0)
                     ) { route ->
                         AppNavGraph(navController = navController)
                     }
+                }
             }
         }
     }

@@ -70,6 +70,8 @@ dependencies {
     implementation(libs.room.ktx)
     kapt(libs.room.compiler)
     testImplementation(libs.room.testing)
+    implementation(libs.accompanist.systemuicontroller)
+    
 }
 
 kapt {

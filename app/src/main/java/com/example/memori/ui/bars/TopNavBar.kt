@@ -19,9 +19,10 @@ import androidx.compose.ui.unit.sp
 fun TopNavBar() {
     val insets = WindowInsets.statusBars.asPaddingValues()
     var menuExpanded by remember { mutableStateOf(false) }
+    val barColor = MaterialTheme.colorScheme.surfaceContainer
 
     Surface(
-        color = MaterialTheme.colorScheme.primary,
+        color = barColor,
         // shadowElevation = 4.dp
     ) {
         Box(
