@@ -103,9 +103,13 @@ class CardViewModel @Inject constructor(
                 cardId = card.cardId,
                 deckId = card.deckId
             ).copy(
-                front = card.front,
-                back = card.back,
-                example = card.example
+                word = card.word,
+                IPA = card.IPA,
+                definition = card.definition,
+                exampleEN = card.exampleEN,
+                exampleCN = card.exampleCN,
+                mnemonic = card.mnemonic,
+                add = card.add
             )
             println("最终用于更新的Card: $updatedCard")
             cardDao.updateCard(updatedCard)

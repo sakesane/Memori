@@ -27,4 +27,7 @@ interface DeckDao {
 
     @Query("SELECT * FROM decks WHERE deckId = :deckId LIMIT 1")
     fun getDeckFlow(deckId: Long): Flow<Deck?>
+
+    @Query("SELECT * FROM decks WHERE deckId IN (:ids)")
+    suspend fun getDecksByIds(ids: List<Long>): List<Deck>
 }

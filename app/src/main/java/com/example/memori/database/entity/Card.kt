@@ -17,8 +17,11 @@ import java.time.LocalDateTime
     indices = [Index(value = ["deckId"])]
 )
 data class Card(
+    // 键
     @PrimaryKey(autoGenerate = true) val cardId: Long = 0,
     val deckId: Long,
+
+    // FSRS 算法相关字段
     val due: LocalDateTime = LocalDateTime.now(),
     val stability: Double = 0.0,
     val difficulty: Double = 0.0,
@@ -28,8 +31,14 @@ data class Card(
     val lapses: Int = 0,
     val status: String = "New",
     val lastReview: LocalDateTime = LocalDateTime.now(),
-    // 为了防止mapper报错，设置为可空
-    val front: String? = null, // 翻转前
-    val back: String? = null,  // 翻转后
-    val example: String? = null
+
+    // 词条相关字段
+    // 为了防止 mapper 报错，设置为可空
+    val word: String? = null,
+    val IPA: String? = null,
+    val definition: String? = null,
+    val exampleEN: String? = null,
+    val exampleCN: String? = null,
+    val mnemonic: String? = null,
+    val add: String? = null
 )

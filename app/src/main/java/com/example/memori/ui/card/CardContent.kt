@@ -41,7 +41,7 @@ fun CardContent(card: Card, isFlipped: Boolean) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             // 左上角实心圆+首字符
-            val firstChar = card.front?.firstOrNull()?.toString() ?: ""
+            val firstChar = card.word?.firstOrNull()?.toString() ?: ""
             Box(
                 modifier = Modifier
                     .size(38.dp),
@@ -76,8 +76,8 @@ fun CardContent(card: Card, isFlipped: Boolean) {
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ){
-            // 大号加粗的 card.front
-            card.front?.let {
+            // 大号加粗的 card.word
+            card.word?.let {
                 Text(
                     text = it,
                     color = questionColor,
@@ -87,14 +87,35 @@ fun CardContent(card: Card, isFlipped: Boolean) {
             }
             Spacer(modifier = Modifier.height(20.dp))
             if (isFlipped) {
-                card.back?.let {
+                card.definition?.let {
                     Text(
                         text = it,
                         fontSize = 32.sp,
                         color = answerColor
                     )
                 }
-                card.example?.let {
+                card.exampleEN?.let {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = it,
+                        fontSize = 24.sp
+                    )
+                }
+                card.exampleCN?.let {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = it,
+                        fontSize = 24.sp
+                    )
+                }
+                card.mnemonic?.let {
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = it,
+                        fontSize = 24.sp
+                    )
+                }
+                card.add?.let {
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         text = it,
@@ -110,5 +131,5 @@ fun CardContent(card: Card, isFlipped: Boolean) {
 @Preview(showBackground = true)
 @Composable
 fun CardContentPreview1() {
-    CardContent( Card(deckId = 0, front = "Apple", back = "苹果"), true)
+    CardContent( Card(deckId = 0, word = "Apple", definition = "苹果"), true)
 }

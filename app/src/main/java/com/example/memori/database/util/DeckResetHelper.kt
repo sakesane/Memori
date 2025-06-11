@@ -34,4 +34,13 @@ object DeckResetHelper {
         }
         println("调用了 DeckResetHelper. Last reset date: $lastReset, Today: $todayFlag")
     }
+
+    suspend fun resetDeckNewCountForDecks(deckDao: DeckDao, deckIds: List<Long>) {
+        val decks = deckDao.getDecksByIds(deckIds)
+        decks.forEach { deck ->
+            deck.newCount = deck.newCardLimit
+            deckDao.updateDeck(deck)
+        }
+        println("强制重置了指定 Deck: $deckIds 的 newCount")
+    }
 }

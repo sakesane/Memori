@@ -12,7 +12,7 @@ import com.example.memori.database.util.Converters
         Card::class,
         Deck::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = false
 )
 
