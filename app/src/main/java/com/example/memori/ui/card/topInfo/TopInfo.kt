@@ -23,12 +23,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.example.memori.R
 import com.example.memori.database.entity.Deck
 
 @Composable
@@ -90,9 +94,9 @@ fun TopInfo(deckId: Long, viewModel: TopInfoViewModel = hiltViewModel()) {
                         val newCount = deck?.newCount ?: 0
                         val reviewCount = deck?.reviewCount ?: 0
                         val sumCount = newCount + reviewCount
-                        statusCountBox("新词", newCount, newColor)
-                        statusCountBox("复习", reviewCount, relearnColor)
-                        statusCountBox("共计", sumCount, sumColor)
+                        statusCountBox("New", newCount, newColor)
+                        statusCountBox("Rev", reviewCount, relearnColor)
+                        statusCountBox("All", sumCount, sumColor)
                     }
                 }
                 Spacer(modifier = Modifier.width(4.dp))
@@ -119,7 +123,7 @@ fun TopInfo(deckId: Long, viewModel: TopInfoViewModel = hiltViewModel()) {
                         horizontalAlignment = Alignment.Start
                     ) {
                         Text(
-                            text = "预计",
+                            text = "学完新词：",
                             color = rTextColor
                         )
                         Row(
@@ -129,7 +133,7 @@ fun TopInfo(deckId: Long, viewModel: TopInfoViewModel = hiltViewModel()) {
                             Text(
                                 text = expectedDays.toString(),
                                 color = dayColor,
-                                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                fontWeight = FontWeight.ExtraBold,
                                 fontSize = 32.sp
                             )
                             Text(
@@ -140,10 +144,6 @@ fun TopInfo(deckId: Long, viewModel: TopInfoViewModel = hiltViewModel()) {
                                 modifier = Modifier.padding(start = 2.dp, bottom = 4.dp)
                             )
                         }
-                        Text(
-                            text = "学完新词",
-                            color = rTextColor
-                        )
                     }
                 }
             }
@@ -171,7 +171,7 @@ fun statusCountBox(status: String, count: Int, numberColor: androidx.compose.ui.
         Text(
             text = count.toString(),
             color = numberColor,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+            fontWeight = FontWeight.ExtraBold,
             fontSize = 32.sp
         )
     }

@@ -101,6 +101,7 @@ fun HomeContent(
                     .fillMaxWidth()
                     .padding(vertical = 12.dp),
                 fontSize = 14.sp,
+                fontWeight = FontWeight.Light,
                 color = refreshTextColor
             )
         }
