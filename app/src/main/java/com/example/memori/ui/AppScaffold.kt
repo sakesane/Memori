@@ -111,7 +111,7 @@ fun AppScaffold(navController: NavHostController) {
         }
     } else {
         Scaffold(
-            topBar = { TopNavBar() },
+            topBar = { TopNavBar(navController = navController) },
             bottomBar = { BottomNavBar(selectedIndex = selectedIndex, navController = navController) },
             floatingActionButton = {
                 if (currentRoute == Routes.HOME) {

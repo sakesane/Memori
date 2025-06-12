@@ -15,10 +15,15 @@ import com.example.memori.database.entity.toFSRSCard
 import com.example.memori.database.entity.toCard
 import kotlinx.coroutines.Dispatchers
 import java.time.LocalDateTime
+import com.example.memori.settings.GlobalSettings
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.first
 
 @HiltViewModel
 class CardViewModel @Inject constructor(
-    private val db: MemoriDB
+    private val db: MemoriDB,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val cardDao = db.cardDao()
@@ -88,7 +93,12 @@ class CardViewModel @Inject constructor(
             val fsrsCard = card.toFSRSCard()
             println("转换为FSRSCard: $fsrsCard")
             val now = LocalDateTime.now()
-            val fsrs = FSRS()
+            val requestRetention = GlobalSettings.getFsrsRequestRetention(context).first()
+            val maximumInterval = GlobalSettings.getFsrsMaximumInterval(context).first()
+            val fsrs = FSRS().apply {
+                p.requestRetention = requestRetention
+                p.maximumInterval = maximumInterval
+            }
             val schedulingMap = fsrs.repeat(fsrsCard, now)
             println("schedulingMap keys: ${schedulingMap.keys}")
             println("用户评分: $rating")

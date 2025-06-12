@@ -10,6 +10,8 @@ import com.example.memori.ui.home.HomeContent
 import com.example.memori.ui.smart.SmartContent
 import com.example.memori.ui.stats.StatsContent
 import com.example.memori.ui.card.CardScreen
+import com.example.memori.ui.settings.SettingsScreen
+import androidx.compose.ui.platform.LocalContext
 
 object Routes {
     const val HOME = "home"
@@ -17,10 +19,12 @@ object Routes {
     const val SMART = "smart"
     const val CARD = "card"
     const val CARD_WITH_ARG = "card/{deckId}"
+    const val SETTINGS = "settings"
 }
 
 @Composable
 fun AppNavGraph(navController: NavHostController, startDestination: String = "home") {
+    val context = LocalContext.current
     NavHost(
         navController = navController,
         startDestination = startDestination
@@ -34,5 +38,6 @@ fun AppNavGraph(navController: NavHostController, startDestination: String = "ho
         ) { backStackEntry ->
             CardScreen(deckId = backStackEntry.arguments?.getString("deckId")?.toLongOrNull() ?: 0L)
         }
+        composable(Routes.SETTINGS) { SettingsScreen(context) }
     }
 }
