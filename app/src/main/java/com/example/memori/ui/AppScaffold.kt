@@ -26,8 +26,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.memori.navigation.Routes
-import com.example.memori.ui.bars.BottomNavBar
-import com.example.memori.ui.bars.TopNavBar
+import com.example.memori.ui.scaffold.TopNavBar
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -37,6 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.memori.ui.home.HomeViewModel
 import java.io.File
 import java.io.InputStream
+import com.example.memori.ui.scaffold.SpeedDialFab
 
 fun getFileName(context: Context, uri: Uri): String {
     var name = "import"
@@ -112,20 +112,23 @@ fun AppScaffold(navController: NavHostController) {
     } else {
         Scaffold(
             topBar = { TopNavBar(navController = navController) },
-            bottomBar = { BottomNavBar(selectedIndex = selectedIndex, navController = navController) },
+            // bottomBar = { BottomNavBar(selectedIndex = selectedIndex, navController = navController) },
             floatingActionButton = {
                 if (currentRoute == Routes.HOME) {
-                    FloatingActionButton(
-                        onClick = {
+                    SpeedDialFab(
+                        onImportClick = {
                             // 只允许选择txt文件
                             filePickerLauncher.launch("text/plain")
+                        },
+                        onCreateDeckClick = {
+                            // TODO: 跳转到创建卡组页面
+                            navController.navigate("createDeck")
+                        },
+                        onInsertCardClick = {
+                            // TODO: 跳转到插入卡片页面
+                            navController.navigate("insertCard")
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "导入卡组"
-                        )
-                    }
+                    )
                 }
             }
         ) { innerPadding ->

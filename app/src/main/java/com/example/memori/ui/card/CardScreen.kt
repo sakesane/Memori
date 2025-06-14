@@ -51,7 +51,7 @@ fun CardScreen(deckId: Long) {
     val cardColor = androidx.compose.material3.MaterialTheme.colorScheme.surface
     val darkTheme = isSystemInDarkTheme()
     val systemUiController = rememberSystemUiController()
-    
+
     LaunchedEffect(deckId) {
         until = CustomNewDayTimeConverter.getTodayRefreshDateTime(context)
         vm.loadCardQueue(deckId, until)

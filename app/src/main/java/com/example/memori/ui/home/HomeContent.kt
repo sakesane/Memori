@@ -2,25 +2,23 @@ package com.example.memori.ui.home
 
 import android.content.Context
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.memori.database.entity.Deck
-import com.example.memori.ui.theme.wordNewGreen
-import com.example.memori.ui.theme.reviewPurple
 import androidx.navigation.NavController
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.memori.navigation.Routes
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.example.memori.database.util.CustomNewDayTimeConverter
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -42,10 +40,17 @@ fun HomeContent(
                 ?.toSet() ?: setOf()
         )
     }
+    val darkTheme = isSystemInDarkTheme()
+    val systemUiController = rememberSystemUiController()
 
     // 每次 expandedDecks 变化时保存
     LaunchedEffect(expandedDecks) {
         prefs.edit().putString("expanded_decks", expandedDecks.joinToString(",")).apply()
+        systemUiController.setNavigationBarColor(
+            color = Color.Transparent,
+            navigationBarContrastEnforced = false,
+            darkIcons = !darkTheme
+        )
     }
 
     // 直接响应式获取 decks
@@ -78,7 +83,16 @@ fun HomeContent(
             thickness = 1.dp,
             color = MaterialTheme.colorScheme.outline
         )
-
+        if (decks.isEmpty()) {
+                Text(
+                    text = "暂无卡组，请先创建卡组或导入卡组",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(28.dp),
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+        }
         DeckList(
             decks = decks,
             expandedDecks = expandedDecks,

@@ -72,7 +72,7 @@ fun SettingsScreen(context: Context) {
                     refreshHourError = null
                 },
                 label = { Text("新一天开始时间（小时）") },
-                placeholder = { Text("输入 (0, 23) 的数字", fontSize = inputPlaceholderFontSize, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)) }, // 使用变量
+                placeholder = { Text("输入 (0, 23) 的数字", fontSize = inputPlaceholderFontSize, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)) },
                 isError = refreshHourError != null,
                 supportingText = { if (refreshHourError != null) Text(refreshHourError!!, color = MaterialTheme.colorScheme.error) },
                 modifier = Modifier.weight(1f)
