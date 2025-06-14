@@ -43,4 +43,13 @@ object DeckResetHelper {
         }
         println("强制重置了指定 Deck: $deckIds 的 newCount")
     }
+
+    suspend fun updateDeckNewCountAfterLimitChanged(deckDao: DeckDao, deckId: Long, oldLimit: Int, newLimit: Int) {
+        val deck = deckDao.getDeckById(deckId) ?: return
+        val originCount = deck.newCount ?: 0
+        val diff = newLimit - oldLimit
+        deck.newCount = (originCount + diff).coerceAtLeast(0)
+        deckDao.updateDeck(deck)
+        println("卡组 $deckId 新卡上限变更，newCount 已调整为 ${deck.newCount}")
+    }
 }

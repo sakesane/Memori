@@ -124,4 +124,19 @@ class HomeViewModel @Inject constructor(
             println("导入完成")
         }
     }
+
+    fun deleteDeck(deck: Deck) {
+        viewModelScope.launch {
+            deckDao.delete(deck)
+        }
+    }
+
+    fun updateDeck(deckId: Long, name: String, newCardLimit: Int) {
+        viewModelScope.launch {
+            val deck = deckDao.getDeckById(deckId) ?: return@launch
+            val oldLimit = deck.newCardLimit ?: 0
+            deckDao.updateDeck(deck.copy(name = name, newCardLimit = newCardLimit))
+            DeckResetHelper.updateDeckNewCountAfterLimitChanged(deckDao, deckId, oldLimit, newCardLimit)
+        }
+    }
 }

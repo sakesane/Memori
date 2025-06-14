@@ -2,6 +2,7 @@ package com.example.memori.ui.home
 
 import android.content.Context
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -9,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -52,21 +54,21 @@ fun HomeContent(
             darkIcons = !darkTheme
         )
     }
-
-    // 直接响应式获取 decks
     val decks by viewModel.decks.collectAsState()
 
     // 计算所有叶子节点的单词数
     val leafDecks = decks.filter { deck -> decks.none { it.parentId == deck.deckId } }
     val wordCount = leafDecks.sumOf { (it.newCount ?: 0) + (it.reviewCount ?: 0) }
 
-    // 新增：异步获取刷新时间
+    // 异步获取刷新时间
     var refreshDateTime by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(Unit) {
         val dateTime = CustomNewDayTimeConverter.getTodayRefreshDateTime(context)
         val formatter = DateTimeFormatter.ofPattern("yyyy / MM / dd  HH : mm")
         refreshDateTime = dateTime.format(formatter)
     }
+
+    var editingDeck by remember { mutableStateOf<Deck?>(null) }
 
     Column(
         modifier = Modifier
@@ -104,10 +106,11 @@ fun HomeContent(
                 navController.navigate(Routes.CARD_WITH_ARG.replace("{deckId}", deckId.toString())) {
                     popUpTo(Routes.HOME)
                 }
-            }
+            },
+            onDeckLongPress = { deck -> editingDeck = deck }
         )
         
-        // 新增：刷新时间提示
+        // 刷新时间提示
         if (refreshDateTime != null) {
             Text(
                 text = "新的一天将在 $refreshDateTime 开始",
@@ -119,6 +122,19 @@ fun HomeContent(
                 color = refreshTextColor
             )
         }
+    }
+
+    if (editingDeck != null) {
+        EditDeckDialog(
+            deck = editingDeck!!,
+            onDismiss = { editingDeck = null },
+            onConfirm = { newName, newLimit ->
+                viewModel.updateDeck(editingDeck!!.deckId, newName, newLimit)
+            },
+            onDelete = {
+                viewModel.deleteDeck(editingDeck!!)
+            }
+        )
     }
 }
 
@@ -142,6 +158,7 @@ fun DeckList(
     onToggleExpand: (Long) -> Unit,
     modifier: Modifier = Modifier,
     onDeckClick: ((Long) -> Unit)? = null,
+    onDeckLongPress: ((Deck) -> Unit)? = null,
     parentId: Long? = null,
     indent: Int = 0
 ) {
@@ -154,6 +171,7 @@ fun DeckList(
                 expandedDecks = expandedDecks,
                 onToggleExpand = onToggleExpand,
                 onDeckClick = onDeckClick,
+                onDeckLongPress = onDeckLongPress, // 新增
                 indent = indent
             )
         }
@@ -167,6 +185,7 @@ fun DeckItem(
     expandedDecks: Set<Long>,
     onToggleExpand: (Long) -> Unit,
     onDeckClick: ((Long) -> Unit)? = null,
+    onDeckLongPress: ((Deck) -> Unit)? = null, // 新增
     indent: Int = 0
 ) {
     val hasChildren = decks.any { it.parentId == deck.deckId }
@@ -176,8 +195,11 @@ fun DeckItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = (indent * 16).dp, end = 16.dp, top = 12.dp, bottom = 12.dp)
-                .let { m ->
-                    if (onDeckClick != null) m.clickable { onDeckClick(deck.deckId) } else m
+                .pointerInput(deck.deckId) {
+                    detectTapGestures(
+                        onLongPress = { onDeckLongPress?.invoke(deck) },
+                        onTap = { onDeckClick?.invoke(deck.deckId) }
+                    )
                 },
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -223,6 +245,7 @@ fun DeckItem(
                 expandedDecks = expandedDecks,
                 onToggleExpand = onToggleExpand,
                 onDeckClick = onDeckClick,
+                onDeckLongPress = onDeckLongPress,
                 parentId = deck.deckId,
                 indent = indent + 1
             )
