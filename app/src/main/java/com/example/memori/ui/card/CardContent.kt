@@ -78,7 +78,7 @@ fun CardContent(card: Card, isFlipped: Boolean) {
                 tint = iconColor
             )
         }
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -93,15 +93,25 @@ fun CardContent(card: Card, isFlipped: Boolean) {
                     fontSize = 44.sp,
                     fontWeight = FontWeight.Black,
                 )
+                // 音标显示
+                if (!card.IPA.isNullOrBlank()) {
+                    Text(
+                        text = card.IPA!!,
+                        color = questionColor.copy(alpha = 0.7f),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Normal,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
             }
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             
             // 只有在背面才显示 definition
             if (isFlipped) {
                 card.definition?.let {
                     Text(
                         text = it,
-                        fontSize = 20.sp,
+                        fontSize = 18.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = definationColor
                     )
