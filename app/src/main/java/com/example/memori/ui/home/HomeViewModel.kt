@@ -44,6 +44,7 @@ class HomeViewModel @Inject constructor(
                 val fruitDeckId = db.deckDao().insert(
                     Deck(
                         name = "fruit",
+                        newCount = 5,
                         newCardLimit = 5,
                         parentId = foodDeckId
                     )

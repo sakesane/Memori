@@ -1,15 +1,19 @@
 package com.example.memori.ui.card
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +39,12 @@ fun CardContent(card: Card, isFlipped: Boolean) {
     val addContainerColor = MaterialTheme.colorScheme.secondaryContainer
     val addColor = MaterialTheme.colorScheme.onSurfaceVariant
 
+
+    val context = LocalContext.current
+    val ttsHelper = remember { TTSHelper(context) }
+    DisposableEffect(Unit) {
+        onDispose { ttsHelper.shutdown() }
+    }
 
     Column(
         modifier = Modifier
@@ -92,6 +102,7 @@ fun CardContent(card: Card, isFlipped: Boolean) {
                     color = questionColor,
                     fontSize = 44.sp,
                     fontWeight = FontWeight.Black,
+                    modifier = Modifier.clickable { ttsHelper.speak(it) } // 点击发音
                 )
                 // 音标显示
                 if (!card.IPA.isNullOrBlank()) {
@@ -140,9 +151,11 @@ fun CardContent(card: Card, isFlipped: Boolean) {
                             fontSize = 18.sp,
                             color = exampleENColor,
                             lineHeight = 20.sp,
-                            modifier = Modifier.graphicsLayer {
-                                alpha = if (isFlipped) 1f else 0.5f
-                            }
+                            modifier = Modifier
+                                .graphicsLayer {
+                                    alpha = if (isFlipped) 1f else 0.5f
+                                }
+                                .clickable { ttsHelper.speak(it) } // 点击发音
                         )
                     }
                     // 中文例句
